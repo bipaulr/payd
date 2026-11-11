@@ -13,7 +13,7 @@ command -v "$CLAUDE_BIN" >/dev/null 2>&1 || fail "claude not found. Install Clau
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || fail "not a git repo. Clone your payd repo and unzip here."
 [ -f .env ] || fail ".env missing. Copy .env.example to .env and fill it in."
 for v in PAYPAL_CLIENT_ID PAYPAL_CLIENT_SECRET PAYOUT_SMOKE_EMAIL \
-         DEMO_VENDOR_EMAIL_1 DEMO_VENDOR_EMAIL_2 DEMO_VENDOR_EMAIL_3 ANTHROPIC_API_KEY; do
+         DEMO_VENDOR_EMAIL_1 DEMO_VENDOR_EMAIL_2 DEMO_VENDOR_EMAIL_3 GEMINI_API_KEY; do
   grep -Eq "^${v}=.+" .env || fail "$v is empty in .env"
 done
 [ -f BLOCKED.md ] && fail "BLOCKED.md exists. Read it, fix the problem, delete it, run again."

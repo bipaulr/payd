@@ -9,7 +9,7 @@ Deadline: Friday Nov 13, 1:30 am IST. Aim to submit by Thursday midnight.
    - Confirm Payouts is enabled in the app's features.
    - Create one business account (USD, with balance) and three personal
      accounts (USD). Note the three personal emails.
-3. Get an API key for your vision model. Set a spending cap on it.
+3. Free AI key: go to aistudio.google.com, sign in with Google, click Get API key, create one. No card needed.
 4. Copy `.env.example` to `.env` and fill it in. For DATABASE_URL either
    paste a hosted Postgres URL, or leave it empty and have Docker running
    (the scaffold will add a local Postgres container).

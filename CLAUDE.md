@@ -8,7 +8,7 @@ the PayPal AI Hackathon. Hard deadline: Nov 12, 2026.
 - Next.js (App Router), TypeScript strict, Tailwind
 - Postgres + Prisma
 - PayPal sandbox: Payouts API, Invoicing via @paypal/agent-toolkit, Webhooks
-- AI: vision extraction behind extractBill(), agent via Vercel AI SDK
+- AI: vision extraction behind extractBill() using the Gemini free tier, agent via Vercel AI SDK (Gemini provider)
 - AG Grid Community for the ledger
 - Deployed on Render with render.yaml
 
