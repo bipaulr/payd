@@ -48,3 +48,12 @@ One line of reasoning each. Newest at the bottom.
 - **lookalike_vendor skips names or emails under 5 characters and only runs for new vendors (unconfirmed, or confirmed with no other bills).** Edit distance 2 makes almost any two short strings "similar".
 - **Approval rules live in `approvalProblem()`; `recordApproval()` locks the bill and requires a risk level before approving.** A bill that was never assessed cannot have its high risk overridden by accident; the P5 route calls this.
 - **Normalisers moved to `lib/bills/normalize.ts`.** The pure risk checks must not import the database client.
+
+## P5 (review and pay screens), 2026-11-11
+
+- **Approve and pay is one route (`POST /api/bills/[id]/approve`): recordApproval(), then payBill().** The Approval row is written first, so no payout exists without a recorded human approval; a failed PayPal call leaves the bill `approved` for "Retry payment".
+- **The approve route rejects (409) if amount or payee email differ from what the confirmation showed.** The owner approves exactly what they saw.
+- **Pay-all-low-risk re-checks every id server-side (needs_review and low risk) and skips the rest.** The client list is only a request.
+- **Edits are limited to needs_review and re-run the risk engine; a confirmed vendor's name is not editable here.**
+- **Ran the dev server with `VISION_MODEL=gemini-3.5-flash` in the shell instead of editing .env.** gemini-3.8-flash returned 503 "high demand" and extraction timed out; 3.5-flash worked.
+- **The webhook route is not part of P5; "Refresh from PayPal" settles payouts here.**
