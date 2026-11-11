@@ -13,6 +13,9 @@ export interface BillFile {
 export interface VisionProvider {
   /** Model id recorded with every extraction, e.g. "gemini-3.8-flash". */
   readonly model: string;
-  /** Returns the model's raw JSON text (possibly invalid) for `file`. */
-  generateJson(input: { file: BillFile; instructions: string; schema: z.ZodType }): Promise<string>;
+  /**
+   * Returns the model's raw JSON text (possibly invalid). `file` is attached
+   * when given; text-only calls (risk engine) omit it.
+   */
+  generateJson(input: { file?: BillFile; instructions: string; schema: z.ZodType }): Promise<string>;
 }

@@ -35,3 +35,16 @@ One line of reasoning each. Newest at the bottom.
 - **Vendor matching checks the printed payee email first, then the normalised name (lowercased, punctuation and Inc/LLC/Co suffixes removed).** An email is the stronger identity; a name match with a different email is left for the P4 payee_changed check.
 - **The vision model gets a plain "wire" schema and payD validates with a stricter Zod schema (date, money and email formats).** Provider JSON-schema subsets vary; the strict errors are what the one retry sends back to the model.
 - **Uploads are typed by magic bytes (PDF, PNG, JPEG, WEBP), not the browser's mime type.** The stored mimeType is later served back by /api/bills/[id]/file.
+
+## P4 (risk engine), 2026-11-11
+
+- **Risk model calls reuse `VisionProvider.generateJson` with `file` made optional.** P4 asks for the same provider interface as lib/extract; text-only calls simply omit the file.
+- **Severities: duplicate, payee_changed and lookalike_vendor are high; amount_anomaly, math_mismatch and pressure_language are medium; level is the highest flag, low with none.** Paying the wrong account or paying twice loses money outright; the others usually have innocent explanations.
+- **pressure_language falls back to a keyword scan if the model call fails.** A model outage may add a flag but must never hide one; the summary falls back to joined reasons as P4 says.
+- **No model call for the summary when there are no flags.** A fixed sentence is enough and it saves free-tier quota.
+- **payee_changed compares against payee emails of paid payouts; with none, against the vendor's email on file.** P3 left "name match, different email" to this check, and a vendor with no payouts still has a known address.
+- **Duplicate and amount history ignore rejected bills; duplicate ignores the file hash entirely.** A rejected bill was never paid, and a re-scan has a new hash but is the same bill.
+- **Unconfirmed vendors' history is other unconfirmed bills with the same normalised proposed name.** Otherwise a duplicate from a not-yet-confirmed vendor would slip through.
+- **lookalike_vendor skips names or emails under 5 characters and only runs for new vendors (unconfirmed, or confirmed with no other bills).** Edit distance 2 makes almost any two short strings "similar".
+- **Approval rules live in `approvalProblem()`; `recordApproval()` locks the bill and requires a risk level before approving.** A bill that was never assessed cannot have its high risk overridden by accident; the P5 route calls this.
+- **Normalisers moved to `lib/bills/normalize.ts`.** The pure risk checks must not import the database client.

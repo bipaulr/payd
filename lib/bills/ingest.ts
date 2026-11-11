@@ -5,6 +5,7 @@ import { valueToCents } from "@/lib/money";
 import { extractBill, type BillExtraction, type ExtractResult, type VisionProvider } from "@/lib/extract";
 import { transition } from "./transition";
 import { matchVendor } from "./vendorMatch";
+import { defaultRiskProvider, runRiskEngine } from "./risk";
 
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 export const ALLOWED_MIME = ["application/pdf", "image/png", "image/jpeg", "image/webp"] as const;
@@ -70,8 +71,8 @@ export type UploadOutcome = { bill: Bill; duplicate: boolean };
  * Store the upload (bytes + SHA-256), or return the existing bill for the same
  * hash. New bills are extracted immediately: success moves them to extracted
  * (then needs_review if any field is under 0.7 confidence or currency is not
- * USD); a second validation failure moves them to needs_review with the raw
- * output saved.
+ * USD) and the risk engine runs, which always ends in needs_review; a second
+ * validation failure moves them to needs_review with the raw output saved.
  */
 export async function ingestUpload(input: UploadInput, provider?: VisionProvider): Promise<UploadOutcome> {
   const fileSha256 = sha256Hex(input.bytes);
@@ -105,6 +106,14 @@ export async function ingestUpload(input: UploadInput, provider?: VisionProvider
     result = { ok: false, error: `Extraction call failed: ${(err as Error).message}`, model: provider?.model ?? process.env.VISION_MODEL ?? "unknown", raw: "", attempts: 0 };
   }
   await applyExtraction(bill.id, result);
+  if (result.ok) {
+    // extracted -> needs_review: the risk engine always runs right after extraction.
+    try {
+      await runRiskEngine(bill.id, provider ?? defaultRiskProvider());
+    } catch (err) {
+      console.error(`risk engine failed for bill ${bill.id}:`, err);
+    }
+  }
   return { bill: await db.bill.findUniqueOrThrow({ where: { id: bill.id } }), duplicate: false };
 }
 
