@@ -1,0 +1,232 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum BillStatus {
+  uploaded
+  extracted
+  needs_review
+  approved
+  paying
+  paid
+  failed
+  rejected
+}
+
+enum RiskLevel {
+  low
+  medium
+  high
+}
+
+enum RiskCheck {
+  duplicate
+  payee_changed
+  amount_anomaly
+  math_mismatch
+  lookalike_vendor
+  pressure_language
+}
+
+enum Decision {
+  approved
+  rejected
+}
+
+enum Actor {
+  user
+  system
+  agent
+  paypal
+}
+
+enum InvoiceCreator {
+  agent
+  user
+}
+
+model Vendor {
+  id                   String   @id @default(cuid())
+  name                 String
+  normalizedName       String
+  paypalEmail          String
+  sandboxReceiverEmail String?
+  defaultCategory      String?
+  isDemo               Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  bills                Bill[]
+
+  @@index([normalizedName])
+}
+
+model Bill {
+  id                  String          @id @default(cuid())
+  vendorId            String?
+  vendor              Vendor?         @relation(fields: [vendorId], references: [id])
+  proposedVendorName  String?
+  proposedVendorEmail String?
+  status              BillStatus      @default(uploaded)
+  fileName            String
+  mimeType            String
+  fileBytes           Bytes
+  fileSha256          String          @unique
+  invoiceNumber       String?
+  issueDate           DateTime?
+  dueDate             DateTime?
+  currency            String          @default("USD")
+  subtotalCents       Int?
+  taxCents            Int?
+  totalCents          Int?
+  payeeEmail          String?
+  paymentInstructions String?
+  extraction          Json            @default("{}")
+  rawModelOutput      String?
+  extractionError     String?
+  riskLevel           RiskLevel?
+  riskSummary         String?
+  category            String?
+  queuedForApprovalAt DateTime?
+  paidAt              DateTime?
+  isDemo              Boolean         @default(false)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  lineItems           BillLineItem[]
+  riskFlags           RiskFlag[]
+  approvals           Approval[]
+  payout              Payout?
+  activity            ActivityLog[]
+
+  @@index([vendorId, invoiceNumber])
+  @@index([vendorId, totalCents, issueDate])
+}
+
+model BillLineItem {
+  id             String   @id @default(cuid())
+  billId         String
+  bill           Bill     @relation(fields: [billId], references: [id], onDelete: Cascade)
+  position       Int
+  description    String
+  quantity       Decimal  @db.Decimal(12, 4)
+  unitPriceCents Int
+  amountCents    Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([billId])
+}
+
+model RiskFlag {
+  id        String    @id @default(cuid())
+  billId    String
+  bill      Bill      @relation(fields: [billId], references: [id], onDelete: Cascade)
+  check     RiskCheck
+  severity  RiskLevel
+  reason    String
+  evidence  Json      @default("{}")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([billId])
+}
+
+model Approval {
+  id             String    @id @default(cuid())
+  billId         String
+  bill           Bill      @relation(fields: [billId], references: [id], onDelete: Cascade)
+  decision       Decision
+  actorName      String
+  reason         String?
+  overrideReason String?
+  amountCents    Int
+  payeeEmail     String?
+  receiverEmail  String?
+  riskLevel      RiskLevel?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  payout         Payout?
+
+  @@index([billId])
+}
+
+model Payout {
+  id             String    @id @default(cuid())
+  billId         String    @unique
+  bill           Bill      @relation(fields: [billId], references: [id])
+  approvalId     String    @unique
+  approval       Approval  @relation(fields: [approvalId], references: [id])
+  senderBatchId  String    @unique
+  senderItemId   String
+  payoutBatchId  String?   @unique
+  payoutItemId   String?
+  batchStatus    String?
+  itemStatus     String?
+  amountCents    Int
+  currency       String    @default("USD")
+  payeeEmail     String?
+  receiverEmail  String
+  lastError      String?
+  lastResponse   Json?
+  lastCheckedAt  DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model WebhookEvent {
+  id                 String    @id @default(cuid())
+  paypalEventId      String    @unique
+  eventType          String
+  resourceType       String?
+  verificationStatus String
+  headers            Json
+  payload            Json
+  processedAt        DateTime?
+  error              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model Invoice {
+  id              String         @id @default(cuid())
+  paypalInvoiceId String         @unique
+  recipientName   String
+  recipientEmail  String
+  amountCents     Int
+  currency        String         @default("USD")
+  description     String
+  dueDate         DateTime?
+  status          String
+  raw             Json           @default("{}")
+  createdBy       InvoiceCreator
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  activity        ActivityLog[]
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  billId    String?
+  bill      Bill?    @relation(fields: [billId], references: [id], onDelete: Cascade)
+  invoiceId String?
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  actor     Actor
+  action    String
+  detail    Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([billId])
+  @@index([invoiceId])
+}
+
+model ExtractionCache {
+  sha256    String   @id
+  model     String
+  result    Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

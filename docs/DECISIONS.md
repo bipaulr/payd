@@ -26,3 +26,7 @@ One line of reasoning each. Newest at the bottom.
 - **The model returns amounts as decimal strings; lib/money parses them to integer cents with string math.** No floats touch money, per CLAUDE.md.
 - **Rate limiting is an in-memory per-IP limiter.** One Render instance; no extra service needed for a hackathon demo.
 - **Demo vendors with no sandbox mapping beyond three emails: the two non-clean demo vendors reuse sandbox receivers 1 and 2.** Only three DEMO_VENDOR_EMAIL slots exist and the duplicate and fake bills should not be paid anyway.
+- **Local Postgres runs on host port 5433.** Port 5432 was already taken on this machine; DATABASE_URL in .env points at 5433.
+
+- **Prisma pinned to 7.10.1 with @prisma/adapter-pg.** Latest npm tag was an 8.0 release candidate; stable matches @prisma/client 7.
+- **Dependencies installed with PowerShell npm.** npm under Git Bash failed to spawn cmd.exe.

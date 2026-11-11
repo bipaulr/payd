@@ -37,7 +37,14 @@ You are usually run headless by run.sh with nobody watching.
 - Do not touch prompts/, run.sh, START-HERE.md or LICENSE.
 
 ## Commands
-(fill in after the scaffold: dev, test, lint, typecheck, migrate, seed)
+- dev: `npm run dev`
+- test: `npm test` (vitest)
+- lint: `npm run lint`
+- typecheck: `npm run typecheck`
+- migrate (dev): `npm run db:migrate`; deploy: `npm run db:deploy`
+- prisma client: `npm run db:generate`
+- local database: `docker compose up -d` (Postgres on port 5433)
+- seed: none yet (added in a later milestone)
 
 ## Done means
 - Typecheck, lint and tests pass

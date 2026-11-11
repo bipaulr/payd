@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: payd
+      POSTGRES_PASSWORD: payd
+      POSTGRES_DB: payd
+    ports:
+      - "5433:5432"
+    volumes:
+      - payd-db:/var/lib/postgresql/data
+volumes:
+  payd-db:
