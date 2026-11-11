@@ -30,3 +30,8 @@ One line of reasoning each. Newest at the bottom.
 
 - **Prisma pinned to 7.10.1 with @prisma/adapter-pg.** Latest npm tag was an 8.0 release candidate; stable matches @prisma/client 7.
 - **Dependencies installed with PowerShell npm.** npm under Git Bash failed to spawn cmd.exe.
+- **Extraction backoff retries on 429 and also 503.** In the P3 eval run, Gemini free tier returned 503 "high demand", which is as transient as a rate limit.
+- **Low-confidence fields (under 0.7) or non-USD currency move a bill from extracted to needs_review right after extraction, listed in `extraction.flaggedFields`.** "Flagged for review" should be visible before the P4 risk engine exists; the transition is already in the state machine.
+- **Vendor matching checks the printed payee email first, then the normalised name (lowercased, punctuation and Inc/LLC/Co suffixes removed).** An email is the stronger identity; a name match with a different email is left for the P4 payee_changed check.
+- **The vision model gets a plain "wire" schema and payD validates with a stricter Zod schema (date, money and email formats).** Provider JSON-schema subsets vary; the strict errors are what the one retry sends back to the model.
+- **Uploads are typed by magic bytes (PDF, PNG, JPEG, WEBP), not the browser's mime type.** The stored mimeType is later served back by /api/bills/[id]/file.

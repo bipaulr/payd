@@ -1,0 +1,26 @@
+{
+  "vendorName": "Harborline IT Services LLC",
+  "vendorPaypalEmail": "ar@harborline-it.example",
+  "invoiceNumber": "HIT-2026-0193",
+  "issueDate": "2026-11-02",
+  "dueDate": "2026-11-16",
+  "currency": "USD",
+  "lineItems": [
+    {
+      "description": "Managed IT support, November",
+      "quantity": "1",
+      "unitPrice": "1250.00",
+      "amount": "1250.00"
+    },
+    {
+      "description": "On-site repair labor (hours)",
+      "quantity": "2.5",
+      "unitPrice": "95.00",
+      "amount": "237.50"
+    }
+  ],
+  "subtotal": "1487.50",
+  "tax": "92.97",
+  "total": "1580.47",
+  "paymentInstructions": "Net 14. Send PayPal payment to ar@harborline-it.example and reference the invoice number."
+}
