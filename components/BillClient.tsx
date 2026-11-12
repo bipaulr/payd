@@ -110,7 +110,7 @@ export default function BillClient({ id }: { id: string }) {
 
   if (notFound) {
     return (
-      <div className="card mx-auto mt-10 max-w-md p-8 text-center">
+      <div className="panel mx-auto mt-10 max-w-md p-8 text-center">
         <p className="font-medium">This bill does not exist</p>
         <p className="mt-1 text-sm text-muted">It may have been removed by a demo reset.</p>
         <Link href="/inbox" className="btn btn-primary mt-4">
@@ -119,7 +119,7 @@ export default function BillClient({ id }: { id: string }) {
       </div>
     );
   }
-  if (!bill) return <p className={`text-sm ${err ? "text-high" : "text-muted"}`}>{err ?? "Loading bill..."}</p>;
+  if (!bill) return <p className={`text-sm ${err ? "text-high" : "text-muted"}`}>{err ?? "Loading bill…"}</p>;
 
   const flagged = new Set(bill.extraction?.flaggedFields ?? []);
   const editable = bill.status === "needs_review";
@@ -134,8 +134,8 @@ export default function BillClient({ id }: { id: string }) {
 
   return (
     <div>
-      <Link href="/inbox" className="text-sm text-muted hover:text-ink">
-        &larr; Inbox
+      <Link href="/inbox" className="text-sm font-semibold text-muted underline underline-offset-4 hover:text-ink">
+        Back to the inbox
       </Link>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <h1 className="h1">{name}</h1>
@@ -144,44 +144,43 @@ export default function BillClient({ id }: { id: string }) {
         <span className="money ml-auto text-2xl font-semibold">{usd(bill.totalCents)}</span>
       </div>
       <p className="mt-1 text-sm text-muted">
-        {bill.invoiceNumber ? `Invoice ${bill.invoiceNumber}` : "No invoice number"} · Due {day(bill.dueDate)}
-        {!bill.vendor && bill.proposedVendorName && " · New vendor, not on file yet"}
+        {bill.invoiceNumber ? `Invoice ${bill.invoiceNumber}` : "No invoice number"}, due {day(bill.dueDate)}.
+        {!bill.vendor && bill.proposedVendorName && " New vendor, not on file yet."}
       </p>
       {err && (
-        <p className="mt-3 rounded-md bg-high-soft px-3 py-2 text-sm text-high" role="alert">
+        <p className="mt-3 rounded-(--radius) bg-high-soft px-3 py-2 text-sm text-high" role="alert">
           {err}
         </p>
       )}
 
       <div className="mt-5 grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
-        <div className="card h-[78vh] overflow-hidden xl:sticky xl:top-4">
+        <div className="panel h-[78vh] overflow-hidden xl:sticky xl:top-4">
           {bill.mimeType === "application/pdf" ? (
-            <iframe title="Original bill" src={`/api/bills/${id}/file#toolbar=0&view=FitH`} className="h-full w-full bg-white" />
+            <iframe title="Original bill" src={`/api/bills/${id}/file#toolbar=0&view=FitH`} className="h-full w-full bg-doc-paper" />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
-            <img alt="Original bill" src={`/api/bills/${id}/file`} className="h-full w-full bg-white object-contain" />
+            <img alt="Original bill" src={`/api/bills/${id}/file`} className="h-full w-full bg-doc-paper object-contain" />
           )}
         </div>
 
         <div className="space-y-5">
           {/* The risk panel is the first thing to read. */}
-          <section className={`rounded-lg border-2 p-5 ${panel ? panel.box : "border-line bg-surface"}`} aria-label="Risk">
+          <section className={`rounded-(--radius) border-2 p-5 ${panel ? panel.box : "border-line bg-surface"}`} aria-label="Risk">
             <h2 className={`text-lg font-semibold ${panel ? panel.title : ""}`}>{panel ? panel.heading : "Risk checks have not run yet"}</h2>
             {/* Shown only when the model wrote it; the fallback is just the reasons below joined together. */}
             {bill.riskSummary && bill.riskFlags.length > 0 && bill.riskSummary !== bill.riskFlags.map((f) => f.reason).join(" ") && <p className="mt-2 text-sm leading-6">{bill.riskSummary}</p>}
             {bill.riskFlags.length > 0 && (
-              <ul className="mt-4 space-y-2">
+              <dl className="rows mt-3">
                 {bill.riskFlags.map((f) => (
-                  <li key={f.id} className="rounded-md bg-surface p-3 text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className={`h-2 w-2 rounded-full ${f.severity === "high" ? "bg-high" : "bg-med"}`} aria-hidden />
-                      <span className="font-semibold">{CHECK_LABEL[f.check] ?? f.check}</span>
-                      <span className="text-xs uppercase tracking-wide text-muted">{f.severity}</span>
-                    </div>
-                    <p className="mt-1 leading-6">{f.reason}</p>
-                  </li>
+                  <div key={f.id} className="grid gap-1 py-3 text-sm sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-4">
+                    <dt>
+                      <span className="block font-semibold">{CHECK_LABEL[f.check] ?? f.check}</span>
+                      <span className="block">{f.severity === "high" ? "High severity" : "Medium severity"}</span>
+                    </dt>
+                    <dd className="leading-6">{f.reason}</dd>
+                  </div>
                 ))}
-              </ul>
+              </dl>
             )}
             {notPayable && <p className="mt-2 text-sm leading-6">The model read the file but found no amount to pay. Type the fields from the document if it is a bill, or reject it. It cannot be paid as it is.</p>}
             {bill.riskFlags.length === 0 && bill.riskLevel && !notPayable && (
@@ -190,11 +189,11 @@ export default function BillClient({ id }: { id: string }) {
           </section>
 
           {(editable || bill.status === "approved" || bill.status === "paying" || bill.payout) && (
-            <section className="card p-5">
+            <section className="panel p-5">
               {editable && (
                 <div className="flex flex-wrap items-center gap-2">
                   <button disabled={busy || bill.totalCents == null || !bill.riskLevel} title={bill.totalCents == null ? "Enter a total first" : !bill.riskLevel ? "The risk checks have not run yet" : undefined} onClick={() => { setText(""); setModal("approve"); }} className={`btn ${bill.riskLevel === "high" ? "" : "btn-primary"}`}>
-                    {bill.riskLevel === "high" ? "Override and pay..." : "Approve and pay"}
+                    {bill.riskLevel === "high" ? "Override and pay…" : "Approve and pay"}
                   </button>
                   <button disabled={busy} onClick={() => { setText(""); setModal("reject"); }} className={`btn ${bill.riskLevel === "high" ? "btn-danger" : ""}`}>
                     Reject
@@ -205,13 +204,13 @@ export default function BillClient({ id }: { id: string }) {
               {bill.status === "approved" && (
                 <div className="flex flex-wrap items-center gap-3">
                   <button disabled={busy} onClick={() => void call("/retry-payment", "POST")} className="btn btn-primary">
-                    {busy ? "Sending..." : "Retry payment"}
+                    {busy ? "Sending…" : "Retry payment"}
                   </button>
                   <span className="text-sm text-muted">Approved, but PayPal did not accept the payment. A retry cannot pay twice.</span>
                 </div>
               )}
               {bill.status === "paying" && (
-                <p className="text-sm font-medium text-info" role="status">
+                <p className="text-sm font-semibold text-info" role="status">
                   PayPal is processing this payment. This page updates on its own every few seconds.
                 </p>
               )}
@@ -241,27 +240,27 @@ export default function BillClient({ id }: { id: string }) {
             </section>
           )}
           {rejection && (
-            <p className="card p-4 text-sm">
+            <p className="panel p-4 text-sm">
               <strong>Rejected by {rejection.actorName}.</strong> {rejection.reason}
             </p>
           )}
           {override && (
-            <p className="card p-4 text-sm">
+            <p className="panel p-4 text-sm">
               <strong>High risk overridden by {override.actorName}.</strong> {override.overrideReason}
             </p>
           )}
 
-          <section className="card p-5">
+          <section className="panel p-5">
             <div className="flex items-baseline justify-between">
               <h2 className="font-semibold">Extracted fields</h2>
               {bill.extraction?.model && <span className="text-xs text-muted">Read by {bill.extraction.model}</span>}
             </div>
             {bill.extractionError && (
-              <p className="mt-2 rounded-md bg-med-soft p-3 text-sm text-med">
+              <p className="mt-2 rounded-(--radius) bg-med-soft p-3 text-sm text-med">
                 The model could not read this file ({bill.extractionError.slice(0, 160)}). Try again, type the fields from the document, or reject the bill.
                 {editable && (
                   <button disabled={busy} onClick={() => void call("/re-extract", "POST")} className="btn mt-2 block">
-                    {busy ? "Reading..." : "Try reading again"}
+                    {busy ? "Reading…" : "Try reading again"}
                   </button>
                 )}
               </p>
@@ -289,11 +288,11 @@ export default function BillClient({ id }: { id: string }) {
             {bill.lineItems.length > 0 && (
               <table className="mt-4 w-full text-sm">
                 <thead>
-                  <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-muted">
-                    <th className="py-1.5 font-medium">Line item</th>
-                    <th className="py-1.5 text-right font-medium">Qty</th>
-                    <th className="py-1.5 text-right font-medium">Unit</th>
-                    <th className="py-1.5 text-right font-medium">Amount</th>
+                  <tr className="border-b border-line-strong text-left text-muted">
+                    <th className="py-1.5 font-semibold">Line item</th>
+                    <th className="py-1.5 text-right font-semibold">Qty</th>
+                    <th className="py-1.5 text-right font-semibold">Unit</th>
+                    <th className="py-1.5 text-right font-semibold">Amount</th>
                   </tr>
                 </thead>
                 <tbody className="money">
@@ -316,14 +315,14 @@ export default function BillClient({ id }: { id: string }) {
             )}
           </section>
 
-          <section className="card p-5">
+          <section className="panel p-5">
             <h2 className="font-semibold">Activity</h2>
             <ol className="mt-3 space-y-2 text-sm">
               {bill.activity.map((a) => (
                 <li key={a.id} className="grid grid-cols-[9.5rem_1fr] gap-3">
                   <time className="money text-muted">{stamp(a.createdAt)}</time>
                   <span>
-                    <span className="font-medium">{label(a.action)}</span> <span className="text-muted">{summarize(a)}</span>
+                    <span className="font-semibold">{label(a.action)}</span> <span className="text-muted">{summarize(a)}</span>
                   </span>
                 </li>
               ))}
@@ -333,8 +332,8 @@ export default function BillClient({ id }: { id: string }) {
       </div>
 
       {modal && (
-        <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-          <div className="card w-full max-w-md p-6 shadow-xl">
+        <div className="fixed inset-0 z-10 flex items-center justify-center bg-scrim p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+          <div className="panel w-full max-w-md p-6 shadow-xl">
             {modal === "approve" ? (
               <>
                 <h2 id="modal-title" className="text-lg font-semibold">
@@ -344,13 +343,13 @@ export default function BillClient({ id }: { id: string }) {
                   <dt className="text-muted">Amount</dt>
                   <dd className="money text-base font-semibold">{usd(bill.totalCents)} USD</dd>
                   <dt className="text-muted">PayPal email on the bill</dt>
-                  <dd className="break-all font-medium">{bill.payeeEmail ?? "none printed"}</dd>
+                  <dd className="break-all font-semibold">{bill.payeeEmail ?? "none printed"}</dd>
                   <dt className="text-muted">PayPal sandbox account paid</dt>
-                  <dd className="break-all font-medium">{bill.receiverEmail ?? "not configured"}</dd>
+                  <dd className="break-all font-semibold">{bill.receiverEmail ?? "not configured"}</dd>
                 </dl>
                 <p className="mt-2 text-xs text-muted">In this sandbox demo each payee is mapped to a test account, so no real money moves.</p>
                 {bill.riskLevel === "high" && (
-                  <label className="mt-4 block text-sm font-medium text-high">
+                  <label className="mt-4 block text-sm font-semibold text-high">
                     This bill is high risk. Type why you are overriding the flags.
                     <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="e.g. I called the vendor on their known number and confirmed the new account" className="input mt-1 text-ink" />
                   </label>
@@ -361,15 +360,15 @@ export default function BillClient({ id }: { id: string }) {
                 <h2 id="modal-title" className="text-lg font-semibold">
                   Reject this bill?
                 </h2>
-                <label className="mt-4 block text-sm font-medium">
+                <label className="mt-4 block text-sm font-semibold">
                   Reason
                   <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="e.g. Duplicate of a bill already paid" className="input mt-1" />
                 </label>
               </>
             )}
-            <label className="mt-4 block text-sm font-medium">
+            <label className="mt-4 block text-sm font-semibold">
               Your name, recorded with the decision
-              <input value={actor} onChange={(e) => setActor(e.target.value)} placeholder="e.g. Paul" className="input mt-1" />
+              <input name="approver" autoComplete="name" value={actor} onChange={(e) => setActor(e.target.value)} placeholder="e.g. Paul" className="input mt-1" />
             </label>
             {err && <p className="mt-3 text-sm text-high">{err}</p>}
             <div className="mt-5 flex justify-end gap-2">
@@ -385,7 +384,7 @@ export default function BillClient({ id }: { id: string }) {
                 }
                 className={`btn ${modal === "approve" ? "btn-primary" : "btn-danger"}`}
               >
-                {busy ? "Working..." : modal === "approve" ? "Confirm and pay" : "Confirm reject"}
+                {busy ? "Working…" : modal === "approve" ? "Confirm and pay" : "Confirm reject"}
               </button>
             </div>
           </div>
@@ -398,7 +397,7 @@ export default function BillClient({ id }: { id: string }) {
 function FieldInput(p: { label: string; value: string; low: boolean; disabled: boolean; onCommit: (v: string) => void }) {
   const [v, setV] = useState(p.value);
   return (
-    <label className="text-xs font-medium text-muted">
+    <label className="text-sm font-semibold text-muted">
       {p.label}
       {p.low && <span className="ml-1 text-med">(check this)</span>}
       <input

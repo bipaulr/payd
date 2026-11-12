@@ -48,7 +48,7 @@ export default function Page() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl">
       <h1 className="h1">Demo</h1>
       <p className="mt-2 max-w-2xl text-muted">
         One click loads an invented jewelry studio: five vendors with months of paid bills, and five new bills waiting in the inbox. Everything is
@@ -56,11 +56,11 @@ export default function Page() {
       </p>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <button className="btn btn-primary px-5 py-2.5" disabled={busy !== null} onClick={() => void run("load")}>
-          {busy === "load" ? "Loading sample data..." : "Load sample data"}
+        <button type="button" className="btn btn-primary" disabled={busy !== null} onClick={() => void run("load")}>
+          {busy === "load" ? "Loading sample data…" : "Load sample data"}
         </button>
-        <button className="btn" disabled={busy !== null} onClick={() => void run("reset")}>
-          {busy === "reset" ? "Resetting..." : "Reset"}
+        <button type="button" className="btn" disabled={busy !== null} onClick={() => void run("reset")}>
+          {busy === "reset" ? "Resetting…" : "Reset"}
         </button>
         {msg && (
           <p role="status" className={`text-sm ${msg.kind === "error" ? "text-high" : "text-ok"}`}>
@@ -70,18 +70,18 @@ export default function Page() {
       </div>
 
       {result && (
-        <section className="card mt-6 overflow-hidden">
+        <section className="panel mt-6 overflow-hidden">
           <div className="flex items-center justify-between border-b border-line px-5 py-3">
             <h2 className="font-semibold">Five new bills are in the inbox</h2>
-            <Link href="/inbox" className="btn btn-primary">
+            <Link href="/inbox" className="btn">
               Open the inbox
             </Link>
           </div>
-          <ul className="divide-y divide-line">
+          <ul className="rows">
             {result.bills.map((b) => (
               <li key={b.billId} className="flex items-start justify-between gap-4 px-5 py-3">
                 <div className="min-w-0">
-                  <Link href={`/bills/${b.billId}`} className="font-medium hover:underline">
+                  <Link href={`/bills/${b.billId}`} className="font-semibold underline underline-offset-4">
                     {b.vendor ?? b.file}
                   </Link>
                   <p className="text-sm text-muted">
@@ -90,7 +90,7 @@ export default function Page() {
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
-                  <span className="money font-medium">{usd(b.totalCents)}</span>
+                  <span className="money font-semibold">{usd(b.totalCents)}</span>
                   <RiskBadge level={b.riskLevel} />
                 </div>
               </li>
@@ -119,7 +119,7 @@ export default function Page() {
           ))}
         </ol>
         <p className="mt-4 text-sm text-muted">
-          The five sample files are in the repository under <code className="rounded bg-surface-2 px-1">samples/demo</code>. You can also drop your own
+          The five sample files are in the repository under <code className="rounded-(--radius) bg-surface-2 px-1">samples/demo</code>. You can also drop your own
           bill on the inbox. Reset clears everything for the next visitor.
         </p>
       </section>

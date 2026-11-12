@@ -80,3 +80,9 @@ One line of reasoning each. Newest at the bottom.
 - **The Invoices page and nav item were removed.** They belong to the agent milestone (P7), which is cut; an empty page is a dead link.
 - **Colours follow Paul's soft pastel rainbow palette (lavender accent; pink, peach, mint and sky for danger, warning, success and info), in light and dark.** His request on Nov 12.
 - **Dev server on this machine: use `npx next dev -p 3100`.** Another app (Docker) holds IPv4 port 3000.
+- **All screens redesigned with the Hallmark design skill (v2.0.0), at Paul's request on Nov 12.** Full depth: content and wiring kept (7/7 links, 31/31 handlers per its linter), system and composition changed. Its linter went from 16 Floor failures to 0.
+- **Top bar instead of a sidebar.** Three destinations do not earn a sidebar, and the ledger and bill page get the width.
+- **The pastel palette is the brand: ten flat swatches as a strip, never a gradient.** Hallmark refuses purple-to-blue gradients; flat blocks keep the palette and pass.
+- **Bricolage Grotesque for heads, Figtree for body, loaded with next/font.** Self-hosted at build time, so no runtime font request.
+- **Landing hero reworded to "Bills in. Fakes out." with a 12-word line, and the eyebrow removed.** Hallmark's hero budget; the hero now shows the real risk panel for the demo's fake bill.
+- **Lists are flat rows with rules, not striped cards; labels are sentence case; the AG Grid theme reads the app's CSS tokens.** One system across screens, and dark mode follows without JavaScript.

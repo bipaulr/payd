@@ -1,26 +1,59 @@
+/* Hallmark · v2.0.0 · redesign: full · genre: modern-minimal · theme: brand (the owner's soft pastel palette) · posture: restrained · shape: app screen · hero: Stage (/) · nav: one bar, a wordmark and three links · footer: one line · signature: the risk panel that catches the fake bill · built: the project */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V3 · weakest: V, five screens share one system on purpose; the landing leads with the real risk panel instead of three feature cards */
+/* Hallmark · dropped "AI finance clerk for small businesses" · 54 names the eyebrow; the sentence under the head says it */
+/* Hallmark · reworded "Bills in. Fakes out. Paid with PayPal when you say so." to "Bills in. Fakes out." · 38iii names the accented words and the hero takes seven words */
 @import "tailwindcss";
 
-/* One palette, two schemes. Components use the token classes below (bg-surface, text-muted, ...). */
+/*
+ * One palette, two schemes. Every colour and face is a token here; components use the
+ * token classes (bg-surface, text-muted, ...). The pastels are the owner's palette: they
+ * are surfaces and state tints, and deeper tones of the same hues carry text.
+ */
 :root {
-  /* Inspired by a soft pastel rainbow: the tints are backgrounds, deeper tones of the same hues carry text. */
-  --bg: #fdfcf3;
+  --bg: #fdfcf6;
   --surface: #ffffff;
   --surface-2: #f4f1fb;
-  --line: #e6e1f0;
+  --line: #e4dff0;
+  --line-strong: #cfc8e2;
   --ink: #26233a;
-  --muted: #6b6880;
-  --accent: #6c5fd4;
+  --muted: #625f77;
+  --accent: #5d50c6;
+  --accent-strong: #4b3fae;
   --accent-ink: #ffffff;
-  --high: #b4324f;
+  --accent-soft: #ece8fb;
+  --high: #a82b47;
   --high-soft: #ffe3e6;
-  --med: #8f5a14;
+  --on-high: #ffffff;
+  --med: #855312;
   --med-soft: #fdecd9;
-  --ok: #1b7a52;
+  --ok: #17704a;
   --ok-soft: #dcfbe1;
-  --info: #1f6a94;
+  --info: #1c6289;
   --info-soft: #d9f1fb;
   --banner: #fbf8cc;
-  --banner-ink: #6b5a10;
+  --banner-ink: #5f500e;
+  --scrim: rgb(38 35 58 / 0.5);
+  --doc-paper: #ffffff;
+  /* The ten swatches, shown flat and never blended. */
+  --swatch-1: #fbf8cc;
+  --swatch-2: #fde4cf;
+  --swatch-3: #ffcfd2;
+  --swatch-4: #f1c0e8;
+  --swatch-5: #cfbaf0;
+  --swatch-6: #a3c4f3;
+  --swatch-7: #90dbf4;
+  --swatch-8: #8eecf5;
+  --swatch-9: #98f5e1;
+  --swatch-10: #b9fbc0;
+  --swatch-ink: #26233a;
+
+  --face-body: var(--font-figtree), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --face-display: var(--font-bricolage), var(--font-figtree), system-ui, sans-serif;
+  --radius: 8px;
+  --radius-pill: 999px;
+  --dur-micro: 120ms;
+  --dur-short: 180ms;
+  --container: 76rem;
   color-scheme: light;
 }
 
@@ -30,20 +63,25 @@
     --surface: #201d2b;
     --surface-2: #2a2638;
     --line: #383349;
+    --line-strong: #4b4560;
     --ink: #f1eff8;
-    --muted: #a7a2ba;
+    --muted: #aaa5bd;
     --accent: #cfbaf0;
+    --accent-strong: #e0d1f7;
     --accent-ink: #251a47;
+    --accent-soft: #322a4d;
     --high: #ffb3ba;
     --high-soft: #45202a;
+    --on-high: #3a0f1b;
     --med: #fdd3a8;
     --med-soft: #40301c;
     --ok: #b9fbc0;
     --ok-soft: #1c3a2a;
     --info: #90dbf4;
     --info-soft: #173746;
-    --banner: #3a3618;
+    --banner: #37331a;
     --banner-ink: #fbf8cc;
+    --scrim: rgb(8 7 12 / 0.65);
     color-scheme: dark;
   }
 }
@@ -53,12 +91,16 @@
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
   --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
   --color-high: var(--high);
   --color-high-soft: var(--high-soft);
+  --color-on-high: var(--on-high);
   --color-med: var(--med);
   --color-med-soft: var(--med-soft);
   --color-ok: var(--ok);
@@ -67,13 +109,42 @@
   --color-info-soft: var(--info-soft);
   --color-banner: var(--banner);
   --color-banner-ink: var(--banner-ink);
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-scrim: var(--scrim);
+  --color-doc-paper: var(--doc-paper);
+  --color-swatch-ink: var(--swatch-ink);
+  --font-sans: var(--face-body);
+  --font-display: var(--face-display);
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+html {
+  scroll-padding-top: 5rem;
+  scrollbar-color: var(--line-strong) var(--bg);
 }
 
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-sans);
+  font-family: var(--face-body);
+  font-synthesis: none;
+  text-wrap: pretty;
+}
+
+::selection {
+  background: var(--swatch-5);
+  color: var(--swatch-ink);
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 
 .money {
@@ -81,35 +152,127 @@ body {
 }
 
 @layer components {
+  /* App controls: 36px tall with a 44px hit target, one filled primary per screen. */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md border border-line bg-surface px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-45;
+    @apply relative inline-flex min-h-9 cursor-pointer items-center justify-center gap-2 rounded-(--radius) border border-line-strong bg-surface px-3.5 text-sm font-semibold text-ink;
+    transition:
+      background-color var(--dur-micro) ease-out,
+      border-color var(--dur-micro) ease-out,
+      transform var(--dur-micro) ease-out;
+  }
+  .btn::after {
+    content: "";
+    position: absolute;
+    inset: -4px 0;
+  }
+  .btn:hover {
+    @apply bg-surface-2;
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
   }
   .btn-primary {
-    @apply border-transparent bg-accent text-accent-ink hover:bg-accent hover:opacity-90;
+    @apply border-transparent bg-accent text-accent-ink;
+  }
+  .btn-primary:hover {
+    @apply bg-accent-strong;
   }
   .btn-danger {
-    @apply border-transparent bg-high text-white hover:bg-high hover:opacity-90;
+    @apply border-transparent bg-high text-on-high;
   }
-  .card {
-    @apply rounded-lg border border-line bg-surface;
+  .btn-danger:hover {
+    @apply bg-high;
+    filter: brightness(0.94);
+  }
+  /* The landing page's one large action. */
+  .btn-lg {
+    @apply min-h-12 px-6 text-base;
+  }
+  .panel {
+    @apply rounded-(--radius) border border-line bg-surface;
   }
   .input {
-    @apply w-full rounded-md border border-line bg-surface px-2.5 py-2 text-sm text-ink outline-none focus:border-accent disabled:bg-surface-2 disabled:text-muted;
+    @apply min-h-9 w-full rounded-(--radius) border border-line-strong bg-surface px-2.5 text-sm text-ink;
   }
+  .input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+  .input:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  textarea.input {
+    @apply py-2;
+  }
+  /* Section labels: the body face a step smaller, sentence case, never tracked. */
   .label {
-    @apply text-xs font-medium uppercase tracking-wide text-muted;
+    @apply text-sm font-semibold text-muted;
   }
   .h1 {
-    @apply text-2xl font-semibold tracking-tight;
+    @apply text-2xl font-semibold;
+    font-family: var(--face-display);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .display {
+    font-family: var(--face-display);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+  }
+  .container-page {
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+  /* Flat rows separated by rules: lists and tables carry no outer card. */
+  .rows > * + * {
+    border-top: 1px solid var(--line);
   }
 }
+
+/* The owner's ten swatches, laid side by side as flat blocks. */
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+}
+.swatches > :nth-child(1) { background: var(--swatch-1); }
+.swatches > :nth-child(2) { background: var(--swatch-2); }
+.swatches > :nth-child(3) { background: var(--swatch-3); }
+.swatches > :nth-child(4) { background: var(--swatch-4); }
+.swatches > :nth-child(5) { background: var(--swatch-5); }
+.swatches > :nth-child(6) { background: var(--swatch-6); }
+.swatches > :nth-child(7) { background: var(--swatch-7); }
+.swatches > :nth-child(8) { background: var(--swatch-8); }
+.swatches > :nth-child(9) { background: var(--swatch-9); }
+.swatches > :nth-child(10) { background: var(--swatch-10); }
+
+.tint-pink { background: var(--swatch-3); color: var(--swatch-ink); }
+.tint-lavender { background: var(--swatch-5); color: var(--swatch-ink); }
+.tint-mint { background: var(--swatch-9); color: var(--swatch-ink); }
 
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* The soft rainbow itself, used sparingly as a thin strip. */
-.rainbow {
-  background: linear-gradient(90deg, #fbf8cc, #fde4cf, #ffcfd2, #f1c0e8, #cfbaf0, #a3c4f3, #90dbf4, #8eecf5, #98f5e1, #b9fbc0);
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  .btn:active {
+    transform: none;
+  }
 }

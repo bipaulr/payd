@@ -29,18 +29,16 @@ export function sortBills(rows: Row[]) {
 }
 
 function BillCard({ r }: { r: Row }) {
-  const edge = r.status !== "needs_review" ? "border-l-line" : r.riskLevel === "high" ? "border-l-high" : r.riskLevel === "medium" ? "border-l-med" : "border-l-ok";
+  const flagged = r.riskFlags.length > 0 && r.status === "needs_review";
   return (
     <li>
-      <Link href={`/bills/${r.id}`} className={`card flex items-center justify-between gap-4 border-l-4 px-4 py-3.5 hover:bg-surface-2 ${edge}`}>
+      <Link href={`/bills/${r.id}`} className="flex min-h-16 items-center justify-between gap-4 px-4 py-3 hover:bg-surface-2">
         <div className="min-w-0">
-          <div className="truncate font-medium">{vendorOf(r)}</div>
-          <div className="mt-0.5 text-sm text-muted">
-            {r.status === "paid" ? `Paid ${day(r.paidAt)}` : `Due ${day(r.dueDate)}`}
-            {r.riskFlags.length > 0 && r.status === "needs_review" && (
-              <span className={r.riskLevel === "high" ? "text-high" : "text-med"}> · {r.riskFlags.map((f) => CHECK_LABEL[f.check] ?? f.check).join(", ")}</span>
-            )}
-          </div>
+          <div className="truncate font-semibold">{vendorOf(r)}</div>
+          <div className="mt-0.5 text-sm text-muted">{r.status === "paid" ? `Paid ${day(r.paidAt)}` : `Due ${day(r.dueDate)}`}</div>
+          {flagged && (
+            <div className={`mt-0.5 text-sm font-semibold ${r.riskLevel === "high" ? "text-high" : "text-med"}`}>{r.riskFlags.map((f) => CHECK_LABEL[f.check] ?? f.check).join(", ")}</div>
+          )}
         </div>
         <div className="flex shrink-0 items-center gap-3">
           <span className="money font-semibold">{usd(r.totalCents)}</span>
@@ -116,7 +114,7 @@ export default function InboxClient() {
   const lowRisk = review.filter((r) => r.status === "needs_review" && r.riskLevel === "low" && r.totalCents && r.totalCents > 0);
 
   async function payAll() {
-    setBusy("Sending payments to PayPal...");
+    setBusy("Sending payments to PayPal…");
     try {
       const res = await fetch("/api/bills/pay-low-risk", {
         method: "POST",
@@ -142,7 +140,7 @@ export default function InboxClient() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div>
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="h1">Inbox</h1>
@@ -164,19 +162,19 @@ export default function InboxClient() {
           setOver(false);
           void upload(e.dataTransfer.files);
         }}
-        className={`mt-5 flex cursor-pointer flex-col items-center rounded-lg border-2 border-dashed px-6 py-7 text-center text-sm ${over ? "border-accent bg-ok-soft" : "border-line bg-surface"}`}
+        className={`mt-5 flex cursor-pointer flex-col items-center rounded-(--radius) border-2 border-dashed px-6 py-7 text-center text-sm ${over ? "border-accent bg-accent-soft" : "border-line-strong bg-surface"}`}
       >
-        <span className="font-medium">{busy ?? "Drop bills here, or click to choose files"}</span>
+        <span className="font-semibold">{busy ?? "Drop bills here, or click to choose files"}</span>
         <span className="mt-1 text-muted">PDF, PNG, JPEG or WEBP, up to 5 MB each</span>
         <input type="file" multiple disabled={busy !== null} accept="application/pdf,image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => { if (e.target.files) void upload(e.target.files); e.target.value = ""; }} />
       </label>
       {msg && (
-        <p className={`mt-3 rounded-md px-3 py-2 text-sm ${msg.kind === "error" ? "bg-high-soft text-high" : "bg-ok-soft text-ok"}`} role="status">
+        <p className={`mt-3 rounded-(--radius) px-3 py-2 text-sm ${msg.kind === "error" ? "bg-high-soft text-high" : "bg-ok-soft text-ok"}`} role="status">
           {msg.text}
         </p>
       )}
       {loadError && (
-        <p className="mt-3 rounded-md bg-high-soft px-3 py-2 text-sm text-high" role="alert">
+        <p className="mt-3 rounded-(--radius) bg-high-soft px-3 py-2 text-sm text-high" role="alert">
           {loadError}{" "}
           <button className="underline" onClick={() => void load()}>
             Retry
@@ -184,11 +182,11 @@ export default function InboxClient() {
         </p>
       )}
 
-      {rows === null && !loadError && <p className="mt-8 text-sm text-muted">Loading bills...</p>}
+      {rows === null && !loadError && <p className="mt-8 text-sm text-muted">Loading bills…</p>}
 
       {rows !== null && all.length === 0 && (
-        <div className="card mt-8 px-6 py-10 text-center">
-          <p className="font-medium">No bills yet</p>
+        <div className="panel mt-8 px-6 py-10 text-center">
+          <p className="font-semibold">No bills yet</p>
           <p className="mt-1 text-sm text-muted">Upload a bill above, or load the sample data to see the full story.</p>
           <Link href="/demo" className="btn btn-primary mt-4">
             Go to the demo
@@ -199,7 +197,7 @@ export default function InboxClient() {
       {review.length > 0 && (
         <section className="mt-8">
           <h2 className="label">Needs your decision ({review.length})</h2>
-          <ul className="mt-2 space-y-2">{review.map((r) => <BillCard key={r.id} r={r} />)}</ul>
+          <ul className="panel rows mt-2 overflow-hidden">{review.map((r) => <BillCard key={r.id} r={r} />)}</ul>
         </section>
       )}
       {rows !== null && all.length > 0 && review.length === 0 && <p className="mt-8 text-sm text-muted">Nothing is waiting for a decision.</p>}
@@ -207,7 +205,7 @@ export default function InboxClient() {
       {inProgress.length > 0 && (
         <section className="mt-8">
           <h2 className="label">With PayPal ({inProgress.length})</h2>
-          <ul className="mt-2 space-y-2">{inProgress.map((r) => <BillCard key={r.id} r={r} />)}</ul>
+          <ul className="panel rows mt-2 overflow-hidden">{inProgress.map((r) => <BillCard key={r.id} r={r} />)}</ul>
         </section>
       )}
 
@@ -215,28 +213,28 @@ export default function InboxClient() {
         <section className="mt-8">
           <div className="flex items-baseline justify-between">
             <h2 className="label">Recently closed</h2>
-            <Link href="/ledger" className="text-sm text-accent hover:underline">
+            <Link href="/ledger" className="text-sm font-semibold text-accent underline underline-offset-4">
               All {done.length} in the ledger
             </Link>
           </div>
-          <ul className="mt-2 space-y-2">{done.slice(0, 5).map((r) => <BillCard key={r.id} r={r} />)}</ul>
+          <ul className="panel rows mt-2 overflow-hidden">{done.slice(0, 5).map((r) => <BillCard key={r.id} r={r} />)}</ul>
         </section>
       )}
 
       {confirmAll && (
-        <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="payall-title">
-          <div className="card w-full max-w-lg p-6 shadow-xl">
+        <div className="fixed inset-0 z-10 flex items-center justify-center bg-scrim p-4" role="dialog" aria-modal="true" aria-labelledby="payall-title">
+          <div className="panel w-full max-w-lg p-6 shadow-xl">
             <h2 id="payall-title" className="text-lg font-semibold">
               Approve and pay {lowRisk.length} low-risk {lowRisk.length === 1 ? "bill" : "bills"}?
             </h2>
-            <ul className="mt-4 max-h-64 divide-y divide-line overflow-auto text-sm">
+            <ul className="rows mt-4 max-h-64 overflow-auto text-sm">
               {lowRisk.map((b) => (
                 <li key={b.id} className="flex justify-between gap-4 py-2">
                   <span className="min-w-0">
-                    <span className="block truncate font-medium">{vendorOf(b)}</span>
+                    <span className="block truncate font-semibold">{vendorOf(b)}</span>
                     <span className="block truncate text-muted">{b.payeeEmail ?? "no PayPal email on the bill"}</span>
                   </span>
-                  <span className="money shrink-0 font-medium">{usd(b.totalCents)}</span>
+                  <span className="money shrink-0 font-semibold">{usd(b.totalCents)}</span>
                 </li>
               ))}
             </ul>
@@ -245,16 +243,16 @@ export default function InboxClient() {
               <span className="money">{usd(lowRisk.reduce((s, b) => s + (b.totalCents ?? 0), 0))}</span>
             </p>
             <p className="mt-1 text-xs text-muted">PayPal sandbox. No real money moves.</p>
-            <label className="mt-4 block text-sm font-medium">
+            <label className="mt-4 block text-sm font-semibold">
               Your name, recorded as the approver
-              <input value={actor} onChange={(e) => setActor(e.target.value)} placeholder="e.g. Paul" className="input mt-1" autoFocus />
+              <input name="approver" autoComplete="name" value={actor} onChange={(e) => setActor(e.target.value)} placeholder="e.g. Paul" className="input mt-1" autoFocus />
             </label>
             <div className="mt-5 flex justify-end gap-2">
               <button onClick={() => setConfirmAll(false)} className="btn" disabled={busy !== null}>
                 Cancel
               </button>
               <button disabled={!actor.trim() || busy !== null} onClick={() => void payAll()} className="btn btn-primary">
-                {busy ? "Paying..." : "Approve and pay all"}
+                {busy ? "Paying…" : "Approve and pay all"}
               </button>
             </div>
           </div>

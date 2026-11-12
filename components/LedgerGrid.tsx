@@ -1,13 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AgGridReact } from "ag-grid-react";
 import {
   AllCommunityModule,
   ModuleRegistry,
-  colorSchemeDark,
-  colorSchemeLight,
   themeQuartz,
   type CellClickedEvent,
   type CellValueChangedEvent,
@@ -108,13 +106,6 @@ function savedState(): GridState | undefined {
   }
 }
 
-const darkQuery = "(prefers-color-scheme: dark)";
-const subscribeDark = (cb: () => void) => {
-  const mq = window.matchMedia(darkQuery);
-  mq.addEventListener("change", cb);
-  return () => mq.removeEventListener("change", cb);
-};
-
 const dateFmt = (p: ValueFormatterParams<Row, Date | null>) => (p.value ? day(p.value) : "");
 const dateCsv = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : "");
 const centsCsv = (c: number | null) => (c == null ? "" : `${c < 0 ? "-" : ""}${Math.floor(Math.abs(c) / 100)}.${String(Math.abs(c) % 100).padStart(2, "0")}`);
@@ -129,7 +120,6 @@ export default function LedgerGrid() {
   const [quick, setQuick] = useState("");
   const [totals, setTotals] = useState<Row[]>([]);
   const [initialState] = useState<GridState | undefined>(savedState);
-  const dark = useSyncExternalStore(subscribeDark, () => window.matchMedia(darkQuery).matches, () => false);
   const viewRef = useRef<View>("all");
 
   const load = useCallback(async () => {
@@ -147,15 +137,21 @@ export default function LedgerGrid() {
     void load();
   }, [load]);
 
-  // Follows the app's light and dark palettes (app/globals.css).
+  // The grid reads the app's own tokens (app/globals.css), so it follows light and dark with the page.
   const theme = useMemo(
     () =>
-      themeQuartz.withPart(dark ? colorSchemeDark : colorSchemeLight).withParams(
-        dark
-          ? { backgroundColor: "#201d2b", foregroundColor: "#f1eff8", headerBackgroundColor: "#2a2638", borderColor: "#383349", accentColor: "#cfbaf0", fontFamily: "inherit", fontSize: 13.5 }
-          : { backgroundColor: "#ffffff", foregroundColor: "#26233a", headerBackgroundColor: "#f4f1fb", borderColor: "#e6e1f0", accentColor: "#6c5fd4", fontFamily: "inherit", fontSize: 13.5 },
-      ),
-    [dark],
+      themeQuartz.withParams({
+        backgroundColor: "var(--surface)",
+        foregroundColor: "var(--ink)",
+        headerBackgroundColor: "var(--surface-2)",
+        borderColor: "var(--line)",
+        accentColor: "var(--accent)",
+        browserColorScheme: "inherit",
+        fontFamily: "inherit",
+        fontSize: 14,
+        wrapperBorderRadius: 8,
+      }),
+    [],
   );
 
   const columns = useMemo<ColDef<Row>[]>(
@@ -195,7 +191,7 @@ export default function LedgerGrid() {
       { field: "batchId", headerName: "PayPal batch id", filter: "agTextColumnFilter", width: 165, cellClass: "font-mono text-xs" },
       {
         field: "category",
-        headerName: "Category (click to edit)",
+        headerName: "Category, click to edit",
         filter: "agTextColumnFilter",
         minWidth: 170,
         flex: 1,
@@ -265,14 +261,14 @@ export default function LedgerGrid() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-94px)] flex-col">
+    <div className="flex h-[calc(100vh-14rem)] min-h-[32rem] flex-col">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="h1">Ledger</h1>
           <p className="mt-1 text-sm text-muted">Every bill and what happened to it. Click a row to open the bill.</p>
         </div>
         <div className="flex items-center gap-2">
-          <input value={quick} onChange={(e) => setQuick(e.target.value)} placeholder="Search vendor, invoice, batch id..." aria-label="Search the ledger" className="input w-72" />
+          <input type="search" name="q" autoComplete="off" value={quick} onChange={(e) => setQuick(e.target.value)} placeholder="Search vendor, invoice, batch id…" aria-label="Search the ledger" className="input w-72" />
           <button className="btn" onClick={exportCsv} disabled={!rows?.length}>
             Export CSV
           </button>
@@ -284,7 +280,7 @@ export default function LedgerGrid() {
 
       <div className="mt-4 flex flex-wrap items-center gap-2" role="group" aria-label="Saved views">
         {VIEWS.map((v) => (
-          <button key={v.key} onClick={() => choose(v.key)} aria-pressed={view === v.key} className={`btn rounded-full px-3 py-1.5 ${view === v.key ? "btn-primary" : ""}`}>
+          <button key={v.key} onClick={() => choose(v.key)} aria-pressed={view === v.key} className={`btn ${view === v.key ? "border-accent bg-accent-soft" : ""}`}>
             {v.label}
           </button>
         ))}
@@ -296,7 +292,7 @@ export default function LedgerGrid() {
       </div>
 
       {error && (
-        <p className="mt-3 rounded-md bg-high-soft px-3 py-2 text-sm text-high" role="alert">
+        <p className="mt-3 rounded-(--radius) bg-high-soft px-3 py-2 text-sm text-high" role="alert">
           {error}{" "}
           <button className="underline" onClick={() => void load()}>
             Retry

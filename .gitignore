@@ -6,3 +6,4 @@ logs/
 BLOCKED.md
 next-env.d.ts
 *.tsbuildinfo
+.hallmark/
