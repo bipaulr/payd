@@ -166,6 +166,9 @@ export async function applyExtraction(billId: string, result: ExtractResult): Pr
   const x = result.data;
   const flagged: string[] = [...result.lowConfidence];
   if (mapped.bill.currency !== "USD") flagged.push("currency");
+  // No total or no vendor means there is nothing payable here (often not a bill at all).
+  if (mapped.bill.totalCents == null) flagged.push("total");
+  if (!x.vendorName.value?.trim()) flagged.push("vendorName");
   const flaggedFields = [...new Set(flagged)];
 
   await db.$transaction(async (tx) => {
@@ -198,4 +201,36 @@ export async function applyExtraction(billId: string, result: ExtractResult): Pr
       await transition(billId, "extracted", "needs_review", { tx, actor: "system", action: "flagged", detail: { reason: "low_confidence", fields: flaggedFields } });
     }
   });
+}
+
+/**
+ * Retry extraction for a bill whose first read failed. Only a bill that is in
+ * needs_review with an extraction error qualifies; it goes back to `uploaded`
+ * (logged) and through the normal extraction and risk path again.
+ */
+export async function retryExtraction(billId: string): Promise<{ ok: true } | { ok: false; status: number; message: string }> {
+  const bill = await db.bill.findUnique({ where: { id: billId } });
+  if (!bill) return { ok: false, status: 404, message: "Bill not found" };
+  const { count } = await db.bill.updateMany({
+    where: { id: billId, status: "needs_review", extractionError: { not: null } },
+    data: { status: "uploaded" },
+  });
+  if (count === 0) return { ok: false, status: 409, message: "This bill was already read, or a decision was made on it" };
+  await db.activityLog.create({ data: { billId, actor: "user", action: "extraction_retry", detail: { from: "needs_review", to: "uploaded" } } });
+
+  let result: ExtractResult;
+  try {
+    result = await extractBill({ bytes: new Uint8Array(bill.fileBytes), mimeType: bill.mimeType, fileName: bill.fileName });
+    if (result.ok) await storeExtraction(bill.fileSha256, result.model, result.data, result.raw).catch(() => undefined);
+  } catch (err) {
+    result = { ok: false, error: `Extraction call failed: ${(err as Error).message}`, model: process.env.VISION_MODEL ?? "unknown", raw: "", attempts: 0 };
+  }
+  await applyExtraction(billId, result);
+  if (!result.ok) return { ok: false, status: 502, message: `The model still could not read this file: ${result.error.slice(0, 200)}` };
+  try {
+    await runRiskEngine(billId);
+  } catch (err) {
+    console.error(`risk engine failed for bill ${billId}:`, err);
+  }
+  return { ok: true };
 }

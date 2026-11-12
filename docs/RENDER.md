@@ -9,7 +9,7 @@
    - `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`: sandbox REST app credentials.
    - `PAYPAL_WEBHOOK_ID`: leave empty until step 6.
    - `PAYOUT_SMOKE_EMAIL`, `DEMO_VENDOR_EMAIL_1..3`: sandbox personal account emails.
-   - `GEMINI_API_KEY`, `VISION_MODEL`: Google AI Studio key and model id.
+   - `GEMINI_API_KEY`: Google AI Studio key. `VISION_MODEL` and `VISION_MODEL_FALLBACK` are preset.
    - `APP_URL`: the service URL, e.g. `https://payd.onrender.com` (after first deploy).
    - `AG_GRID_LICENSE_KEY`: optional.
    `DATABASE_URL` is wired from `payd-db` automatically; `PAYPAL_ENV` is `sandbox`.
@@ -18,9 +18,15 @@
 5. Open `https://<your-service>.onrender.com/api/health`; expect
    `{"status":"ok","database":"healthy"}`.
 6. In the PayPal developer dashboard (sandbox app > Webhooks) add
-   `https://<your-service>.onrender.com/api/webhooks/paypal`, subscribe the
-   payout and invoice events listed in docs/PLAN.md section 4, copy the
+   `https://<your-service>.onrender.com/api/webhooks/paypal`, subscribe all
+   "Payment payouts-item" and "Payment payoutsbatch" events (listed in docs/PLAN.md section 4), copy the
    Webhook ID into `PAYPAL_WEBHOOK_ID` on Render and redeploy.
+
+7. Open the site, go to Demo and click **Load sample data**. Pay one bill and check its
+   timeline shows "PayPal webhook received".
+
+The build command installs dev dependencies (`npm ci --include=dev`) because the
+build needs TypeScript and Tailwind.
 
 Free-tier notes: the web service sleeps when idle, and free Postgres
 databases expire after a limited period; check Render's current limits.

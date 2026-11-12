@@ -124,7 +124,11 @@ export default function BillClient({ id }: { id: string }) {
   const flagged = new Set(bill.extraction?.flaggedFields ?? []);
   const editable = bill.status === "needs_review";
   const name = bill.vendor?.name ?? bill.proposedVendorName ?? bill.fileName;
-  const panel = PANEL[bill.riskLevel ?? ""] ?? null;
+  // A file with no total is not payable, whatever the checks say (often it is not a bill at all).
+  const notPayable = bill.totalCents == null && !bill.extractionError && bill.status === "needs_review";
+  const panel = notPayable
+    ? { box: "border-med bg-med-soft", title: "text-med", heading: "No total was found. This may not be a bill." }
+    : (PANEL[bill.riskLevel ?? ""] ?? null);
   const rejection = bill.approvals.find((a) => a.decision === "rejected");
   const override = bill.approvals.find((a) => a.decision === "approved" && a.overrideReason);
 
@@ -179,7 +183,8 @@ export default function BillClient({ id }: { id: string }) {
                 ))}
               </ul>
             )}
-            {bill.riskFlags.length === 0 && bill.riskLevel && (
+            {notPayable && <p className="mt-2 text-sm leading-6">The model read the file but found no amount to pay. Type the fields from the document if it is a bill, or reject it. It cannot be paid as it is.</p>}
+            {bill.riskFlags.length === 0 && bill.riskLevel && !notPayable && (
               <p className="mt-2 text-sm leading-6">Vendor, payee email, amount and arithmetic are consistent with this vendor&apos;s past bills. Six checks ran.</p>
             )}
           </section>
@@ -188,7 +193,7 @@ export default function BillClient({ id }: { id: string }) {
             <section className="card p-5">
               {editable && (
                 <div className="flex flex-wrap items-center gap-2">
-                  <button disabled={busy} onClick={() => { setText(""); setModal("approve"); }} className={`btn ${bill.riskLevel === "high" ? "" : "btn-primary"}`}>
+                  <button disabled={busy || bill.totalCents == null || !bill.riskLevel} title={bill.totalCents == null ? "Enter a total first" : !bill.riskLevel ? "The risk checks have not run yet" : undefined} onClick={() => { setText(""); setModal("approve"); }} className={`btn ${bill.riskLevel === "high" ? "" : "btn-primary"}`}>
                     {bill.riskLevel === "high" ? "Override and pay..." : "Approve and pay"}
                   </button>
                   <button disabled={busy} onClick={() => { setText(""); setModal("reject"); }} className={`btn ${bill.riskLevel === "high" ? "btn-danger" : ""}`}>
@@ -253,7 +258,12 @@ export default function BillClient({ id }: { id: string }) {
             </div>
             {bill.extractionError && (
               <p className="mt-2 rounded-md bg-med-soft p-3 text-sm text-med">
-                The model could not read this file ({bill.extractionError.slice(0, 160)}). Type the fields from the document, or reject the bill.
+                The model could not read this file ({bill.extractionError.slice(0, 160)}). Try again, type the fields from the document, or reject the bill.
+                {editable && (
+                  <button disabled={busy} onClick={() => void call("/re-extract", "POST")} className="btn mt-2 block">
+                    {busy ? "Reading..." : "Try reading again"}
+                  </button>
+                )}
               </p>
             )}
             <div className="mt-3 grid grid-cols-2 gap-3">
@@ -414,6 +424,7 @@ const LABELS: Record<string, string> = {
   uploaded: "Uploaded",
   extracted: "Fields extracted",
   extraction_failed: "Extraction failed",
+  extraction_retry: "Reading the file again",
   flagged: "Flagged for review",
   risk_assessed: "Risk checks ran",
   edited: "Fields edited",
