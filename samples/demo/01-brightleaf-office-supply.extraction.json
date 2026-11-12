@@ -1,0 +1,70 @@
+{
+  "sha256": "658aa2586a4ab54410302d3145a9e8d7f842339b0ba367e76cccd335eae9d207",
+  "model": "gemini-3.5-flash",
+  "data": {
+    "vendorName": {
+      "value": "Brightleaf Office Supply",
+      "confidence": 0.99
+    },
+    "vendorPaypalEmail": {
+      "value": "billing@brightleaf-supply.example",
+      "confidence": 0.99
+    },
+    "invoiceNumber": {
+      "value": "BL-20417",
+      "confidence": 0.99
+    },
+    "issueDate": {
+      "value": "2026-11-06",
+      "confidence": 0.99
+    },
+    "dueDate": {
+      "value": "2026-12-06",
+      "confidence": 0.99
+    },
+    "currency": {
+      "value": "USD",
+      "confidence": 0.99
+    },
+    "lineItems": {
+      "value": [
+        {
+          "description": "Copy paper, 10 reams",
+          "quantity": "3",
+          "unitPrice": "45.99",
+          "amount": "137.97"
+        },
+        {
+          "description": "Gel pens, box of 24",
+          "quantity": "2",
+          "unitPrice": "18.50",
+          "amount": "37.00"
+        },
+        {
+          "description": "Shipping labels, roll",
+          "quantity": "1",
+          "unitPrice": "27.99",
+          "amount": "27.99"
+        }
+      ],
+      "confidence": 0.99
+    },
+    "subtotal": {
+      "value": "202.96",
+      "confidence": 0.99
+    },
+    "tax": {
+      "value": "0.00",
+      "confidence": 0.99
+    },
+    "total": {
+      "value": "202.96",
+      "confidence": 0.99
+    },
+    "paymentInstructions": {
+      "value": "Pay via PayPal to billing@brightleaf-supply.example within 30 days.",
+      "confidence": 0.99
+    }
+  },
+  "raw": "{\"vendorName\":{\"value\":\"Brightleaf Office Supply\",\"confidence\":0.99},\"vendorPaypalEmail\":{\"value\":\"billing@brightleaf-supply.example\",\"confidence\":0.99},\"invoiceNumber\":{\"value\":\"BL-20417\",\"confidence\":0.99},\"issueDate\":{\"value\":\"2026-11-06\",\"confidence\":0.99},\"dueDate\":{\"value\":\"2026-12-06\",\"confidence\":0.99},\"currency\":{\"value\":\"USD\",\"confidence\":0.99},\"lineItems\":{\"value\":[{\"description\":\"Copy paper, 10 reams\",\"quantity\":\"3\",\"unitPrice\":\"45.99\",\"amount\":\"137.97\"},{\"description\":\"Gel pens, box of 24\",\"quantity\":\"2\",\"unitPrice\":\"18.50\",\"amount\":\"37.00\"},{\"description\":\"Shipping labels, roll\",\"quantity\":\"1\",\"unitPrice\":\"27.99\",\"amount\":\"27.99\"}],\"confidence\":0.99},\"subtotal\":{\"value\":\"202.96\",\"confidence\":0.99},\"tax\":{\"value\":\"0.00\",\"confidence\":0.99},\"total\":{\"value\":\"202.96\",\"confidence\":0.99},\"paymentInstructions\":{\"value\":\"Pay via PayPal to billing@brightleaf-supply.example within 30 days.\",\"confidence\":0.99}}"
+}

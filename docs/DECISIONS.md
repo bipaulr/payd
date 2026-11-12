@@ -67,3 +67,16 @@ One line of reasoning each. Newest at the bottom.
 - **payBill and webhook tests run against the real Postgres with a mocked PayPal (global fetch), and skip when no database is reachable.** The double-pay guarantee is a row lock and unique keys; a mocked database would not prove it.
 - **`VISION_MODEL_FALLBACK` (default `gemini-3.5-flash`) is tried when the main model returns 503 or 429 or times out, and a failed model is skipped for 3 minutes.** `gemini-3.8-flash` returned 503 "high demand" on both days; a demo cannot depend on one free-tier model.
 - **P7 (agent) and P9 (polish) are cut.** Paul's instruction: only if everything else is verified with 3 hours left, which it is not.
+- **Read routes refresh `paying` bills from PayPal, at most once per 8 seconds per bill.** The UI already polls every 3 seconds; without this a bill only settled on a webhook or a manual "Refresh from PayPal".
+- **Approving a bill from a vendor not on file creates the Vendor in the same transaction, logged as `vendor_confirmed`.** P0 decided a vendor is created only on a human action; approval is that action, and later bills then get payee-changed and duplicate checks.
+- **The confirm dialog shows the PayPal email on the bill and the sandbox account that is actually paid.** P5 asks for the exact PayPal email; in sandbox they differ.
+- **Demo history is 35 paid bills created directly in the database with `SAMPLE-` batch ids and a "not sent to PayPal" timeline note.** Sending 35 real sandbox payouts on every load would be slow and rate limited; the label keeps it honest.
+- **The five demo bills are real PDFs in samples/demo, extracted once with Gemini and stored as `*.extraction.json`; load seeds ExtractionCache from them.** The demo then needs no model call and loads in under a second.
+- **Demo load runs the risk rules without the model, then re-runs the flagged bills with the model in the background.** The level comes from rules either way; the model only improves the wording, and a quota error cannot slow or break the load.
+- **`npm run db:seed` is the demo loader (40 rows).** One code path for P6's seed and P8's demo.
+- **Fallback chain is `gemini-3.5-flash,gemini-3.5-flash-lite,gemini-3.7-flash`; a 404 (retired model) also moves to the next.** On Nov 12 3.8-flash returned 503 and 3.5-flash hit its free-tier quota within about 25 calls.
+- **Render build uses `npm ci --include=dev`.** Render sets NODE_ENV=production, which makes npm skip devDependencies, and the build needs TypeScript and Tailwind.
+- **pdf-lib moved to dependencies.** The demo loader draws the history bills at runtime.
+- **The Invoices page and nav item were removed.** They belong to the agent milestone (P7), which is cut; an empty page is a dead link.
+- **Colours follow Paul's soft pastel rainbow palette (lavender accent; pink, peach, mint and sky for danger, warning, success and info), in light and dark.** His request on Nov 12.
+- **Dev server on this machine: use `npx next dev -p 3100`.** Another app (Docker) holds IPv4 port 3000.

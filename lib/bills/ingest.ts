@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { Prisma, type Bill } from "@prisma/client";
 import { db } from "@/lib/db";
 import { valueToCents } from "@/lib/money";
-import { extractBill, type BillExtraction, type ExtractResult, type VisionProvider } from "@/lib/extract";
+import { BillExtractionSchema, extractBill, lowConfidenceFields, type BillExtraction, type ExtractResult, type VisionProvider } from "@/lib/extract";
 import { transition } from "./transition";
 import { matchVendor } from "./vendorMatch";
 import { defaultRiskProvider, runRiskEngine } from "./risk";
@@ -67,6 +67,29 @@ export interface UploadInput {
 
 export type UploadOutcome = { bill: Bill; duplicate: boolean };
 
+export interface IngestOptions {
+  /** Vision provider for extraction (tests); defaults to Gemini. */
+  provider?: VisionProvider;
+  /** Provider for the risk engine's model calls; null uses the deterministic fallbacks only. */
+  riskProvider?: VisionProvider | null;
+  isDemo?: boolean;
+}
+
+/** A stored extraction for this exact file, if one exists and still validates. */
+export async function cachedExtraction(sha256: string): Promise<ExtractResult | null> {
+  const row = await db.extractionCache.findUnique({ where: { sha256 } });
+  if (!row) return null;
+  const stored = row.result as { data?: unknown; raw?: unknown };
+  const parsed = BillExtractionSchema.safeParse(stored.data);
+  if (!parsed.success) return null;
+  return { ok: true, data: parsed.data, lowConfidence: lowConfidenceFields(parsed.data), model: row.model, raw: typeof stored.raw === "string" ? stored.raw : JSON.stringify(stored.data), attempts: 0 };
+}
+
+export async function storeExtraction(sha256: string, model: string, data: BillExtraction, raw: string): Promise<void> {
+  const result = { data, raw } as unknown as Prisma.InputJsonValue;
+  await db.extractionCache.upsert({ where: { sha256 }, create: { sha256, model, result }, update: { model, result } });
+}
+
 /**
  * Store the upload (bytes + SHA-256), or return the existing bill for the same
  * hash. New bills are extracted immediately: success moves them to extracted
@@ -74,7 +97,8 @@ export type UploadOutcome = { bill: Bill; duplicate: boolean };
  * USD) and the risk engine runs, which always ends in needs_review; a second
  * validation failure moves them to needs_review with the raw output saved.
  */
-export async function ingestUpload(input: UploadInput, provider?: VisionProvider): Promise<UploadOutcome> {
+export async function ingestUpload(input: UploadInput, opts: IngestOptions = {}): Promise<UploadOutcome> {
+  const { provider } = opts;
   const fileSha256 = sha256Hex(input.bytes);
   const existing = await db.bill.findUnique({ where: { fileSha256 } });
   if (existing) return { bill: existing, duplicate: true };
@@ -83,7 +107,7 @@ export async function ingestUpload(input: UploadInput, provider?: VisionProvider
   try {
     bill = await db.$transaction(async (tx) => {
       const b = await tx.bill.create({
-        data: { fileName: input.fileName, mimeType: input.mimeType, fileBytes: Buffer.from(input.bytes), fileSha256 },
+        data: { fileName: input.fileName, mimeType: input.mimeType, fileBytes: Buffer.from(input.bytes), fileSha256, isDemo: opts.isDemo ?? false },
       });
       await tx.activityLog.create({
         data: { billId: b.id, actor: "user", action: "uploaded", detail: { fileName: input.fileName, mimeType: input.mimeType, sha256: fileSha256, bytes: input.bytes.byteLength } },
@@ -99,9 +123,12 @@ export async function ingestUpload(input: UploadInput, provider?: VisionProvider
     throw err;
   }
 
+  // Extraction is cached by file hash: the same file never costs a second model call.
   let result: ExtractResult;
   try {
-    result = await extractBill({ bytes: input.bytes, mimeType: input.mimeType, fileName: input.fileName }, provider);
+    const cached = await cachedExtraction(fileSha256);
+    result = cached ?? (await extractBill({ bytes: input.bytes, mimeType: input.mimeType, fileName: input.fileName }, provider));
+    if (!cached && result.ok) await storeExtraction(fileSha256, result.model, result.data, result.raw).catch(() => undefined);
   } catch (err) {
     result = { ok: false, error: `Extraction call failed: ${(err as Error).message}`, model: provider?.model ?? process.env.VISION_MODEL ?? "unknown", raw: "", attempts: 0 };
   }
@@ -109,7 +136,7 @@ export async function ingestUpload(input: UploadInput, provider?: VisionProvider
   if (result.ok) {
     // extracted -> needs_review: the risk engine always runs right after extraction.
     try {
-      await runRiskEngine(bill.id, provider ?? defaultRiskProvider());
+      await runRiskEngine(bill.id, opts.riskProvider !== undefined ? opts.riskProvider : (provider ?? defaultRiskProvider()));
     } catch (err) {
       console.error(`risk engine failed for bill ${bill.id}:`, err);
     }
@@ -145,7 +172,7 @@ export async function applyExtraction(billId: string, result: ExtractResult): Pr
     const match = await matchVendor(x.vendorName.value, x.vendorPaypalEmail.value, tx);
     const vendorData =
       match.kind === "matched"
-        ? { vendorId: match.vendor.id }
+        ? { vendorId: match.vendor.id, category: match.vendor.defaultCategory }
         : match.kind === "proposed"
           ? { proposedVendorName: match.name, proposedVendorEmail: match.email }
           : {};
@@ -162,7 +189,7 @@ export async function applyExtraction(billId: string, result: ExtractResult): Pr
       tx,
       actor: "system",
       action: "extracted",
-      detail: { model: result.model, attempts: result.attempts, flaggedFields, vendorMatch: match.kind },
+      detail: { model: result.model, attempts: result.attempts, cached: result.attempts === 0, flaggedFields, vendorMatch: match.kind },
       data: { ...mapped.bill, ...vendorData, extraction, rawModelOutput: result.raw, extractionError: null },
     });
     if (!moved) return;

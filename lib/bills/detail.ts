@@ -1,8 +1,9 @@
 import { db } from "@/lib/db";
+import { receiverEmailFor } from "./approve";
 
 /** Everything the bill page shows, without the file bytes. */
 export async function loadBillDetail(id: string) {
-  return db.bill.findUnique({
+  const bill = await db.bill.findUnique({
     where: { id },
     omit: { fileBytes: true, rawModelOutput: true },
     include: {
@@ -14,4 +15,7 @@ export async function loadBillDetail(id: string) {
       activity: { orderBy: { createdAt: "asc" } },
     },
   });
+  if (!bill) return null;
+  // The sandbox account a payout would go to, shown in the confirmation before approving.
+  return { ...bill, receiverEmail: bill.payout?.receiverEmail ?? receiverEmailFor(bill.vendor) };
 }

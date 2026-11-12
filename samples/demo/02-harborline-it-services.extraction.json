@@ -1,0 +1,64 @@
+{
+  "sha256": "071c79a113e209aefb1bad669a8c16e7b059c9917e1065f2aab708ecb430ec05",
+  "model": "gemini-3.5-flash",
+  "data": {
+    "vendorName": {
+      "value": "Harborline IT Services LLC",
+      "confidence": 0.98
+    },
+    "vendorPaypalEmail": {
+      "value": "ar@harborline-it.example",
+      "confidence": 0.98
+    },
+    "invoiceNumber": {
+      "value": "HIT-2026-0193",
+      "confidence": 0.99
+    },
+    "issueDate": {
+      "value": "2026-11-09",
+      "confidence": 0.99
+    },
+    "dueDate": {
+      "value": "2026-11-23",
+      "confidence": 0.99
+    },
+    "currency": {
+      "value": "USD",
+      "confidence": 0.99
+    },
+    "lineItems": {
+      "value": [
+        {
+          "description": "Managed IT support, monthly",
+          "quantity": "1",
+          "unitPrice": "1250.00",
+          "amount": "1250.00"
+        },
+        {
+          "description": "On-site repair labor (hours)",
+          "quantity": "2.5",
+          "unitPrice": "95.00",
+          "amount": "237.50"
+        }
+      ],
+      "confidence": 0.98
+    },
+    "subtotal": {
+      "value": "1487.50",
+      "confidence": 0.99
+    },
+    "tax": {
+      "value": "92.97",
+      "confidence": 0.99
+    },
+    "total": {
+      "value": "1580.47",
+      "confidence": 0.99
+    },
+    "paymentInstructions": {
+      "value": "Net 14. Send PayPal payment to ar@harborline-it.example and reference the invoice number.",
+      "confidence": 0.98
+    }
+  },
+  "raw": "{\"vendorName\":{\"value\":\"Harborline IT Services LLC\",\"confidence\":0.98},\"vendorPaypalEmail\":{\"value\":\"ar@harborline-it.example\",\"confidence\":0.98},\"invoiceNumber\":{\"value\":\"HIT-2026-0193\",\"confidence\":0.99},\"issueDate\":{\"value\":\"2026-11-09\",\"confidence\":0.99},\"dueDate\":{\"value\":\"2026-11-23\",\"confidence\":0.99},\"currency\":{\"value\":\"USD\",\"confidence\":0.99},\"lineItems\":{\"value\":[{\"description\":\"Managed IT support, monthly\",\"quantity\":\"1\",\"unitPrice\":\"1250.00\",\"amount\":\"1250.00\"},{\"description\":\"On-site repair labor (hours)\",\"quantity\":\"2.5\",\"unitPrice\":\"95.00\",\"amount\":\"237.50\"}],\"confidence\":0.98},\"subtotal\":{\"value\":\"1487.50\",\"confidence\":0.99},\"tax\":{\"value\":\"92.97\",\"confidence\":0.99},\"total\":{\"value\":\"1580.47\",\"confidence\":0.99},\"paymentInstructions\":{\"value\":\"Net 14. Send PayPal payment to ar@harborline-it.example and reference the invoice number.\",\"confidence\":0.98}}"
+}

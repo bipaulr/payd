@@ -3,7 +3,7 @@ services:
     name: payd
     runtime: node
     plan: free
-    buildCommand: npm ci && npx prisma generate && npm run build
+    buildCommand: npm ci --include=dev && npx prisma generate && npm run build
     preDeployCommand: npx prisma migrate deploy
     startCommand: npm run start
     healthCheckPath: /api/health
@@ -35,7 +35,7 @@ services:
       - key: VISION_MODEL
         value: gemini-3.8-flash
       - key: VISION_MODEL_FALLBACK
-        value: gemini-3.5-flash
+        value: gemini-3.5-flash,gemini-3.5-flash-lite,gemini-3.7-flash
       - key: APP_URL
         sync: false
       - key: AG_GRID_LICENSE_KEY

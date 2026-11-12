@@ -1,8 +1,13 @@
+"use client";
+
+import dynamic from "next/dynamic";
+
+// The grid reads localStorage and the colour scheme, so it renders in the browser only.
+const LedgerGrid = dynamic(() => import("@/components/LedgerGrid"), {
+  ssr: false,
+  loading: () => <p className="text-sm text-muted">Loading the ledger...</p>,
+});
+
 export default function Page() {
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold">Ledger</h1>
-      <p className="mt-2 text-zinc-600">The bill ledger will appear here.</p>
-    </div>
-  );
+  return <LedgerGrid />;
 }

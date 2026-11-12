@@ -1,0 +1,27 @@
+{
+  "kind": "duplicate",
+  "vendorName": "Pinecrest Print Works",
+  "vendorPaypalEmail": "invoices@pinecrest-print.example",
+  "invoiceNumber": "PPW-3107",
+  "issueDate": "2026-10-22",
+  "dueDate": "2026-11-18",
+  "currency": "USD",
+  "lineItems": [
+    {
+      "description": "Product catalog, 24 pages, full colour",
+      "quantity": "150",
+      "unitPrice": "2.10",
+      "amount": "315.00"
+    },
+    {
+      "description": "Business cards, box of 500",
+      "quantity": "2",
+      "unitPrice": "39.00",
+      "amount": "78.00"
+    }
+  ],
+  "subtotal": "393.00",
+  "tax": "21.62",
+  "total": "414.62",
+  "paymentInstructions": "Due in 15 days. Pay by PayPal to invoices@pinecrest-print.example."
+}

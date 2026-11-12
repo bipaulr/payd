@@ -1,0 +1,33 @@
+{
+  "kind": "clean",
+  "vendorName": "Brightleaf Office Supply",
+  "vendorPaypalEmail": "billing@brightleaf-supply.example",
+  "invoiceNumber": "BL-20417",
+  "issueDate": "2026-11-06",
+  "dueDate": "2026-12-06",
+  "currency": "USD",
+  "lineItems": [
+    {
+      "description": "Copy paper, 10 reams",
+      "quantity": "3",
+      "unitPrice": "45.99",
+      "amount": "137.97"
+    },
+    {
+      "description": "Gel pens, box of 24",
+      "quantity": "2",
+      "unitPrice": "18.50",
+      "amount": "37.00"
+    },
+    {
+      "description": "Shipping labels, roll",
+      "quantity": "1",
+      "unitPrice": "27.99",
+      "amount": "27.99"
+    }
+  ],
+  "subtotal": "202.96",
+  "tax": "0.00",
+  "total": "202.96",
+  "paymentInstructions": "Pay via PayPal to billing@brightleaf-supply.example within 30 days."
+}

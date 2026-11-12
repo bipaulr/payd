@@ -1,0 +1,64 @@
+{
+  "sha256": "f39d90e3b39a9b29aeaa5111c996c5ea0e1e3decca116f552a6e842b58dee94f",
+  "model": "gemini-3.5-flash",
+  "data": {
+    "vendorName": {
+      "value": "GREENFORK CATERING CO.",
+      "confidence": 0.99
+    },
+    "vendorPaypalEmail": {
+      "value": "payments@greenfork-catering.example",
+      "confidence": 0.99
+    },
+    "invoiceNumber": {
+      "value": "GF-5521",
+      "confidence": 0.99
+    },
+    "issueDate": {
+      "value": "2026-11-10",
+      "confidence": 0.99
+    },
+    "dueDate": {
+      "value": "2026-11-24",
+      "confidence": 0.99
+    },
+    "currency": {
+      "value": "USD",
+      "confidence": 0.99
+    },
+    "lineItems": {
+      "value": [
+        {
+          "description": "Team lunch buffet (per person)",
+          "quantity": "18",
+          "unitPrice": "16.75",
+          "amount": "301.50"
+        },
+        {
+          "description": "Delivery fee",
+          "quantity": "1",
+          "unitPrice": "35.00",
+          "amount": "35.00"
+        }
+      ],
+      "confidence": 0.99
+    },
+    "subtotal": {
+      "value": "336.50",
+      "confidence": 0.99
+    },
+    "tax": {
+      "value": "27.76",
+      "confidence": 0.99
+    },
+    "total": {
+      "value": "364.26",
+      "confidence": 0.99
+    },
+    "paymentInstructions": {
+      "value": "Payment by PayPal to payments@greenfork-catering.example. Thank you for your business.",
+      "confidence": 0.99
+    }
+  },
+  "raw": "{\"vendorName\":{\"value\":\"GREENFORK CATERING CO.\",\"confidence\":0.99},\"vendorPaypalEmail\":{\"value\":\"payments@greenfork-catering.example\",\"confidence\":0.99},\"invoiceNumber\":{\"value\":\"GF-5521\",\"confidence\":0.99},\"issueDate\":{\"value\":\"2026-11-10\",\"confidence\":0.99},\"dueDate\":{\"value\":\"2026-11-24\",\"confidence\":0.99},\"currency\":{\"value\":\"USD\",\"confidence\":0.99},\"lineItems\":{\"value\":[{\"description\":\"Team lunch buffet (per person)\",\"quantity\":\"18\",\"unitPrice\":\"16.75\",\"amount\":\"301.50\"},{\"description\":\"Delivery fee\",\"quantity\":\"1\",\"unitPrice\":\"35.00\",\"amount\":\"35.00\"}],\"confidence\":0.99},\"subtotal\":{\"value\":\"336.50\",\"confidence\":0.99},\"tax\":{\"value\":\"27.76\",\"confidence\":0.99},\"total\":{\"value\":\"364.26\",\"confidence\":0.99},\"paymentInstructions\":{\"value\":\"Payment by PayPal to payments@greenfork-catering.example. Thank you for your business.\",\"confidence\":0.99}}"
+}

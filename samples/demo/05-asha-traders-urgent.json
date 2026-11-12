@@ -1,0 +1,27 @@
+{
+  "kind": "fake",
+  "vendorName": "Asha Traders",
+  "vendorPaypalEmail": "asha.traders.pay@mail.example",
+  "invoiceNumber": "AT-1093",
+  "issueDate": "2026-11-11",
+  "dueDate": "2026-11-13",
+  "currency": "USD",
+  "lineItems": [
+    {
+      "description": "Sterling silver chain, 18 in",
+      "quantity": "48",
+      "unitPrice": "34.00",
+      "amount": "1632.00"
+    },
+    {
+      "description": "Jewelry gift boxes, pack of 50",
+      "quantity": "6",
+      "unitPrice": "42.50",
+      "amount": "255.00"
+    }
+  ],
+  "subtotal": "1887.00",
+  "tax": "0.00",
+  "total": "1887.00",
+  "paymentInstructions": "URGENT: our account details have changed. Pay today by PayPal to asha.traders.pay@mail.example only. Do not use the old account. Late payment will hold your next shipment."
+}

@@ -1,0 +1,27 @@
+{
+  "kind": "clean",
+  "vendorName": "Greenfork Catering Co.",
+  "vendorPaypalEmail": "payments@greenfork-catering.example",
+  "invoiceNumber": "GF-5521",
+  "issueDate": "2026-11-10",
+  "dueDate": "2026-11-24",
+  "currency": "USD",
+  "lineItems": [
+    {
+      "description": "Team lunch buffet (per person)",
+      "quantity": "18",
+      "unitPrice": "16.75",
+      "amount": "301.50"
+    },
+    {
+      "description": "Delivery fee",
+      "quantity": "1",
+      "unitPrice": "35.00",
+      "amount": "35.00"
+    }
+  ],
+  "subtotal": "336.50",
+  "tax": "27.76",
+  "total": "364.26",
+  "paymentInstructions": "Payment by PayPal to payments@greenfork-catering.example. Thank you for your business."
+}

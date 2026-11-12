@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { day, RiskBadge, StatusBadge, usd } from "./badges";
+import { CHECK_LABEL, day, RiskBadge, StatusBadge, usd } from "./badges";
 
 interface Row {
   id: string;
@@ -11,9 +11,12 @@ interface Row {
   riskLevel: "low" | "medium" | "high" | null;
   totalCents: number | null;
   dueDate: string | null;
+  paidAt: string | null;
+  updatedAt: string;
   proposedVendorName: string | null;
   payeeEmail: string | null;
   vendor: { name: string } | null;
+  riskFlags: { check: string; severity: string }[];
 }
 
 const RANK = { high: 0, medium: 1, low: 2 } as const;
@@ -25,68 +28,127 @@ export function sortBills(rows: Row[]) {
   return [...rows].sort((a, b) => rank(a) - rank(b) || (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999"));
 }
 
+function BillCard({ r }: { r: Row }) {
+  const edge = r.status !== "needs_review" ? "border-l-line" : r.riskLevel === "high" ? "border-l-high" : r.riskLevel === "medium" ? "border-l-med" : "border-l-ok";
+  return (
+    <li>
+      <Link href={`/bills/${r.id}`} className={`card flex items-center justify-between gap-4 border-l-4 px-4 py-3.5 hover:bg-surface-2 ${edge}`}>
+        <div className="min-w-0">
+          <div className="truncate font-medium">{vendorOf(r)}</div>
+          <div className="mt-0.5 text-sm text-muted">
+            {r.status === "paid" ? `Paid ${day(r.paidAt)}` : `Due ${day(r.dueDate)}`}
+            {r.riskFlags.length > 0 && r.status === "needs_review" && (
+              <span className={r.riskLevel === "high" ? "text-high" : "text-med"}> · {r.riskFlags.map((f) => CHECK_LABEL[f.check] ?? f.check).join(", ")}</span>
+            )}
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-3">
+          <span className="money font-semibold">{usd(r.totalCents)}</span>
+          <StatusBadge status={r.status} />
+          <RiskBadge level={r.riskLevel} />
+        </div>
+      </Link>
+    </li>
+  );
+}
+
 export default function InboxClient() {
   const [rows, setRows] = useState<Row[] | null>(null);
-  const [msg, setMsg] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [msg, setMsg] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
   const [over, setOver] = useState(false);
   const [confirmAll, setConfirmAll] = useState(false);
   const [actor, setActor] = useState("");
 
   const load = useCallback(async () => {
-    const res = await fetch("/api/bills", { cache: "no-store" });
-    setRows(((await res.json()) as { bills: Row[] }).bills);
+    try {
+      const res = await fetch("/api/bills", { cache: "no-store" });
+      if (!res.ok) throw new Error();
+      setRows(((await res.json()) as { bills: Row[] }).bills);
+      setLoadError(null);
+    } catch {
+      setLoadError("Could not load the bills. Check that the server and database are running.");
+    }
   }, []);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
   }, [load]);
 
+  // While PayPal is processing a payout, poll so the card flips to Paid on its own.
+  const anyPaying = (rows ?? []).some((r) => r.status === "paying");
+  useEffect(() => {
+    if (!anyPaying) return;
+    const t = setInterval(() => void load(), 3000);
+    return () => clearInterval(t);
+  }, [anyPaying, load]);
+
   async function upload(files: FileList | File[]) {
-    setBusy(true);
+    const list = Array.from(files);
+    if (list.length === 0) return;
     setMsg(null);
     const notes: string[] = [];
-    for (const file of Array.from(files)) {
-      const form = new FormData();
-      form.append("file", file);
-      const res = await fetch("/api/bills", { method: "POST", body: form });
-      const body = (await res.json()) as { error?: string; duplicate?: boolean };
-      notes.push(!res.ok ? `${file.name}: ${body.error}` : body.duplicate ? `${file.name}: already uploaded` : `${file.name}: uploaded`);
+    let failed = false;
+    for (const [i, file] of list.entries()) {
+      setBusy(`Reading ${file.name} (${i + 1} of ${list.length}). This can take up to 30 seconds.`);
+      try {
+        const form = new FormData();
+        form.append("file", file);
+        const res = await fetch("/api/bills", { method: "POST", body: form });
+        const body = (await res.json()) as { error?: string; duplicate?: boolean };
+        if (!res.ok) failed = true;
+        notes.push(!res.ok ? `${file.name}: ${body.error ?? "upload failed"}` : body.duplicate ? `${file.name}: this exact file was already uploaded` : `${file.name}: read and checked`);
+      } catch {
+        failed = true;
+        notes.push(`${file.name}: could not reach the server`);
+      }
     }
-    setMsg(notes.join(" | "));
-    setBusy(false);
+    setMsg({ kind: failed ? "error" : "ok", text: notes.join("  |  ") });
+    setBusy(null);
     await load();
   }
 
-  const lowRisk = sortBills((rows ?? []).filter((r) => r.status === "needs_review" && r.riskLevel === "low" && r.totalCents && r.totalCents > 0));
+  const all = rows ?? [];
+  const review = sortBills(all.filter((r) => ["needs_review", "uploaded", "extracted"].includes(r.status)));
+  const inProgress = all.filter((r) => r.status === "approved" || r.status === "paying");
+  const done = all.filter((r) => ["paid", "failed", "rejected"].includes(r.status)).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const lowRisk = review.filter((r) => r.status === "needs_review" && r.riskLevel === "low" && r.totalCents && r.totalCents > 0);
 
   async function payAll() {
-    setBusy(true);
-    const res = await fetch("/api/bills/pay-low-risk", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ actorName: actor, billIds: lowRisk.map((b) => b.id) }),
-    });
-    const body = (await res.json()) as { error?: string; results?: { ok: boolean; message?: string }[] };
-    if (!res.ok) setMsg(body.error ?? "Failed");
-    else {
-      const ok = body.results!.filter((r) => r.ok).length;
-      setMsg(`Paid ${ok} of ${body.results!.length} bills.${body.results!.filter((r) => !r.ok).map((r) => ` ${r.message}`).join("")}`);
-      setConfirmAll(false);
+    setBusy("Sending payments to PayPal...");
+    try {
+      const res = await fetch("/api/bills/pay-low-risk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ actorName: actor, billIds: lowRisk.map((b) => b.id) }),
+      });
+      const body = (await res.json()) as { error?: string; results?: { ok: boolean; message?: string }[] };
+      if (!res.ok || !body.results) setMsg({ kind: "error", text: body.error ?? "The payments could not be started. Try again." });
+      else {
+        const ok = body.results.filter((r) => r.ok).length;
+        const problems = body.results.filter((r) => !r.ok).map((r) => r.message).join(" ");
+        setMsg({
+          kind: problems ? "error" : "ok",
+          text: `${ok} of ${body.results.length} payments sent to PayPal.${problems ? ` ${problems} Open the bill to retry.` : " They show as Paid once PayPal confirms."}`,
+        });
+        setConfirmAll(false);
+      }
+    } catch {
+      setMsg({ kind: "error", text: "Could not reach the server. No payment was confirmed; check the bills before retrying." });
     }
-    setBusy(false);
+    setBusy(null);
     await load();
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Inbox</h1>
-        <button
-          disabled={lowRisk.length === 0 || busy}
-          onClick={() => setConfirmAll(true)}
-          className="rounded bg-zinc-900 px-3 py-2 text-sm text-white disabled:opacity-40"
-        >
+    <div className="mx-auto max-w-5xl">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="h1">Inbox</h1>
+          <p className="mt-1 text-sm text-muted">Bills waiting for your decision, riskiest first.</p>
+        </div>
+        <button disabled={lowRisk.length === 0 || busy !== null} onClick={() => setConfirmAll(true)} className="btn btn-primary">
           Pay all low-risk ({lowRisk.length})
         </button>
       </div>
@@ -102,50 +164,97 @@ export default function InboxClient() {
           setOver(false);
           void upload(e.dataTransfer.files);
         }}
-        className={`mt-4 flex cursor-pointer flex-col items-center rounded border-2 border-dashed p-8 text-sm ${over ? "border-zinc-900 bg-zinc-50" : "border-zinc-300"}`}
+        className={`mt-5 flex cursor-pointer flex-col items-center rounded-lg border-2 border-dashed px-6 py-7 text-center text-sm ${over ? "border-accent bg-ok-soft" : "border-line bg-surface"}`}
       >
-        <span>{busy ? "Working... extraction can take a few seconds" : "Drop bills here (PDF, PNG, JPEG, WEBP, max 5 MB) or click to choose"}</span>
-        <input type="file" multiple accept="application/pdf,image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => e.target.files && void upload(e.target.files)} />
+        <span className="font-medium">{busy ?? "Drop bills here, or click to choose files"}</span>
+        <span className="mt-1 text-muted">PDF, PNG, JPEG or WEBP, up to 5 MB each</span>
+        <input type="file" multiple disabled={busy !== null} accept="application/pdf,image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => { if (e.target.files) void upload(e.target.files); e.target.value = ""; }} />
       </label>
-      {msg && <p className="mt-3 text-sm text-zinc-700" role="status">{msg}</p>}
+      {msg && (
+        <p className={`mt-3 rounded-md px-3 py-2 text-sm ${msg.kind === "error" ? "bg-high-soft text-high" : "bg-ok-soft text-ok"}`} role="status">
+          {msg.text}
+        </p>
+      )}
+      {loadError && (
+        <p className="mt-3 rounded-md bg-high-soft px-3 py-2 text-sm text-high" role="alert">
+          {loadError}{" "}
+          <button className="underline" onClick={() => void load()}>
+            Retry
+          </button>
+        </p>
+      )}
 
-      <ul className="mt-6 space-y-3">
-        {rows && sortBills(rows).map((r) => (
-          <li key={r.id}>
-            <Link href={`/bills/${r.id}`} className="flex items-center justify-between rounded border border-zinc-200 p-4 hover:bg-zinc-50">
-              <div>
-                <div className="font-medium">{vendorOf(r)}</div>
-                <div className="text-sm text-zinc-600">Due {day(r.dueDate)}</div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="font-medium">{usd(r.totalCents)}</span>
-                <StatusBadge status={r.status} />
-                <RiskBadge level={r.riskLevel} />
-              </div>
+      {rows === null && !loadError && <p className="mt-8 text-sm text-muted">Loading bills...</p>}
+
+      {rows !== null && all.length === 0 && (
+        <div className="card mt-8 px-6 py-10 text-center">
+          <p className="font-medium">No bills yet</p>
+          <p className="mt-1 text-sm text-muted">Upload a bill above, or load the sample data to see the full story.</p>
+          <Link href="/demo" className="btn btn-primary mt-4">
+            Go to the demo
+          </Link>
+        </div>
+      )}
+
+      {review.length > 0 && (
+        <section className="mt-8">
+          <h2 className="label">Needs your decision ({review.length})</h2>
+          <ul className="mt-2 space-y-2">{review.map((r) => <BillCard key={r.id} r={r} />)}</ul>
+        </section>
+      )}
+      {rows !== null && all.length > 0 && review.length === 0 && <p className="mt-8 text-sm text-muted">Nothing is waiting for a decision.</p>}
+
+      {inProgress.length > 0 && (
+        <section className="mt-8">
+          <h2 className="label">With PayPal ({inProgress.length})</h2>
+          <ul className="mt-2 space-y-2">{inProgress.map((r) => <BillCard key={r.id} r={r} />)}</ul>
+        </section>
+      )}
+
+      {done.length > 0 && (
+        <section className="mt-8">
+          <div className="flex items-baseline justify-between">
+            <h2 className="label">Recently closed</h2>
+            <Link href="/ledger" className="text-sm text-accent hover:underline">
+              All {done.length} in the ledger
             </Link>
-          </li>
-        ))}
-        {rows?.length === 0 && <li className="text-sm text-zinc-600">No bills yet. Upload one above.</li>}
-      </ul>
+          </div>
+          <ul className="mt-2 space-y-2">{done.slice(0, 5).map((r) => <BillCard key={r.id} r={r} />)}</ul>
+        </section>
+      )}
 
       {confirmAll && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40" role="dialog" aria-modal="true">
-          <div className="w-full max-w-lg rounded bg-white p-6">
-            <h2 className="text-lg font-semibold">Pay {lowRisk.length} low-risk bills?</h2>
-            <ul className="mt-3 max-h-64 space-y-1 overflow-auto text-sm">
+        <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="payall-title">
+          <div className="card w-full max-w-lg p-6 shadow-xl">
+            <h2 id="payall-title" className="text-lg font-semibold">
+              Approve and pay {lowRisk.length} low-risk {lowRisk.length === 1 ? "bill" : "bills"}?
+            </h2>
+            <ul className="mt-4 max-h-64 divide-y divide-line overflow-auto text-sm">
               {lowRisk.map((b) => (
-                <li key={b.id} className="flex justify-between">
-                  <span>{vendorOf(b)} ({b.payeeEmail ?? "no email"})</span>
-                  <span>{usd(b.totalCents)}</span>
+                <li key={b.id} className="flex justify-between gap-4 py-2">
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium">{vendorOf(b)}</span>
+                    <span className="block truncate text-muted">{b.payeeEmail ?? "no PayPal email on the bill"}</span>
+                  </span>
+                  <span className="money shrink-0 font-medium">{usd(b.totalCents)}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-2 text-sm font-medium">Total {usd(lowRisk.reduce((s, b) => s + (b.totalCents ?? 0), 0))}</p>
-            <input value={actor} onChange={(e) => setActor(e.target.value)} placeholder="Your name (recorded as the approver)" className="mt-3 w-full rounded border border-zinc-300 p-2 text-sm" />
-            <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setConfirmAll(false)} className="rounded px-3 py-2 text-sm">Cancel</button>
-              <button disabled={!actor.trim() || busy} onClick={() => void payAll()} className="rounded bg-zinc-900 px-3 py-2 text-sm text-white disabled:opacity-40">
-                Approve and pay all
+            <p className="mt-3 flex justify-between border-t border-line pt-3 font-semibold">
+              <span>Total</span>
+              <span className="money">{usd(lowRisk.reduce((s, b) => s + (b.totalCents ?? 0), 0))}</span>
+            </p>
+            <p className="mt-1 text-xs text-muted">PayPal sandbox. No real money moves.</p>
+            <label className="mt-4 block text-sm font-medium">
+              Your name, recorded as the approver
+              <input value={actor} onChange={(e) => setActor(e.target.value)} placeholder="e.g. Paul" className="input mt-1" autoFocus />
+            </label>
+            <div className="mt-5 flex justify-end gap-2">
+              <button onClick={() => setConfirmAll(false)} className="btn" disabled={busy !== null}>
+                Cancel
+              </button>
+              <button disabled={!actor.trim() || busy !== null} onClick={() => void payAll()} className="btn btn-primary">
+                {busy ? "Paying..." : "Approve and pay all"}
               </button>
             </div>
           </div>

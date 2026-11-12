@@ -1,0 +1,64 @@
+{
+  "sha256": "56e388df053f633e35dd49d082661e40f5af487f079bfbfe5bf7dae462967ec9",
+  "model": "gemini-3.5-flash",
+  "data": {
+    "vendorName": {
+      "value": "PINECREST PRINT WORKS",
+      "confidence": 1
+    },
+    "vendorPaypalEmail": {
+      "value": "invoices@pinecrest-print.example",
+      "confidence": 1
+    },
+    "invoiceNumber": {
+      "value": "PPW-3107",
+      "confidence": 1
+    },
+    "issueDate": {
+      "value": "2026-10-22",
+      "confidence": 1
+    },
+    "dueDate": {
+      "value": "2026-11-18",
+      "confidence": 1
+    },
+    "currency": {
+      "value": "USD",
+      "confidence": 1
+    },
+    "lineItems": {
+      "value": [
+        {
+          "description": "Product catalog, 24 pages, full colour",
+          "quantity": "150",
+          "unitPrice": "2.10",
+          "amount": "315.00"
+        },
+        {
+          "description": "Business cards, box of 500",
+          "quantity": "2",
+          "unitPrice": "39.00",
+          "amount": "78.00"
+        }
+      ],
+      "confidence": 1
+    },
+    "subtotal": {
+      "value": "393.00",
+      "confidence": 1
+    },
+    "tax": {
+      "value": "21.62",
+      "confidence": 1
+    },
+    "total": {
+      "value": "414.62",
+      "confidence": 1
+    },
+    "paymentInstructions": {
+      "value": "Due in 15 days. Pay by PayPal to invoices@pinecrest-print.example.",
+      "confidence": 1
+    }
+  },
+  "raw": "{\"vendorName\":{\"value\":\"PINECREST PRINT WORKS\",\"confidence\":1},\"vendorPaypalEmail\":{\"value\":\"invoices@pinecrest-print.example\",\"confidence\":1},\"invoiceNumber\":{\"value\":\"PPW-3107\",\"confidence\":1},\"issueDate\":{\"value\":\"2026-10-22\",\"confidence\":1},\"dueDate\":{\"value\":\"2026-11-18\",\"confidence\":1},\"currency\":{\"value\":\"USD\",\"confidence\":1},\"lineItems\":{\"value\":[{\"description\":\"Product catalog, 24 pages, full colour\",\"quantity\":\"150\",\"unitPrice\":\"2.10\",\"amount\":\"315.00\"},{\"description\":\"Business cards, box of 500\",\"quantity\":\"2\",\"unitPrice\":\"39.00\",\"amount\":\"78.00\"}],\"confidence\":1},\"subtotal\":{\"value\":\"393.00\",\"confidence\":1},\"tax\":{\"value\":\"21.62\",\"confidence\":1},\"total\":{\"value\":\"414.62\",\"confidence\":1},\"paymentInstructions\":{\"value\":\"Due in 15 days. Pay by PayPal to invoices@pinecrest-print.example.\",\"confidence\":1}}"
+}

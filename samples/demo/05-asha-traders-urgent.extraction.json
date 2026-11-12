@@ -1,0 +1,64 @@
+{
+  "sha256": "309466eaa432fc63c714c9d8db8312222345a706c1cc13457669376984d4b0a0",
+  "model": "gemini-3.5-flash",
+  "data": {
+    "vendorName": {
+      "value": "Asha Traders",
+      "confidence": 1
+    },
+    "vendorPaypalEmail": {
+      "value": "asha.traders.pay@mail.example",
+      "confidence": 1
+    },
+    "invoiceNumber": {
+      "value": "AT-1093",
+      "confidence": 1
+    },
+    "issueDate": {
+      "value": "2026-11-11",
+      "confidence": 1
+    },
+    "dueDate": {
+      "value": "2026-11-13",
+      "confidence": 1
+    },
+    "currency": {
+      "value": "USD",
+      "confidence": 1
+    },
+    "lineItems": {
+      "value": [
+        {
+          "description": "Sterling silver chain, 18 in",
+          "quantity": "48",
+          "unitPrice": "34.00",
+          "amount": "1632.00"
+        },
+        {
+          "description": "Jewelry gift boxes, pack of 50",
+          "quantity": "6",
+          "unitPrice": "42.50",
+          "amount": "255.00"
+        }
+      ],
+      "confidence": 1
+    },
+    "subtotal": {
+      "value": "1887.00",
+      "confidence": 1
+    },
+    "tax": {
+      "value": "0.00",
+      "confidence": 1
+    },
+    "total": {
+      "value": "1887.00",
+      "confidence": 1
+    },
+    "paymentInstructions": {
+      "value": "URGENT: our account details have changed. Pay today by PayPal to asha.traders.pay@mail.example only. Do not use the old account. Late payment will hold your next shipment.",
+      "confidence": 1
+    }
+  },
+  "raw": "{\"vendorName\":{\"value\":\"Asha Traders\",\"confidence\":1},\"vendorPaypalEmail\":{\"value\":\"asha.traders.pay@mail.example\",\"confidence\":1},\"invoiceNumber\":{\"value\":\"AT-1093\",\"confidence\":1},\"issueDate\":{\"value\":\"2026-11-11\",\"confidence\":1},\"dueDate\":{\"value\":\"2026-11-13\",\"confidence\":1},\"currency\":{\"value\":\"USD\",\"confidence\":1},\"lineItems\":{\"value\":[{\"description\":\"Sterling silver chain, 18 in\",\"quantity\":\"48\",\"unitPrice\":\"34.00\",\"amount\":\"1632.00\"},{\"description\":\"Jewelry gift boxes, pack of 50\",\"quantity\":\"6\",\"unitPrice\":\"42.50\",\"amount\":\"255.00\"}],\"confidence\":1},\"subtotal\":{\"value\":\"1887.00\",\"confidence\":1},\"tax\":{\"value\":\"0.00\",\"confidence\":1},\"total\":{\"value\":\"1887.00\",\"confidence\":1},\"paymentInstructions\":{\"value\":\"URGENT: our account details have changed. Pay today by PayPal to asha.traders.pay@mail.example only. Do not use the old account. Late payment will hold your next shipment.\",\"confidence\":1}}"
+}

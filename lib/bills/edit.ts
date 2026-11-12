@@ -62,3 +62,13 @@ export async function editBill(billId: string, input: EditInput): Promise<EditRe
   await runRiskEngine(billId);
   return { ok: true };
 }
+
+/** Set or clear the ledger category. Bookkeeping only, so it is allowed in any status. */
+export async function setCategory(billId: string, value: unknown): Promise<EditResult> {
+  if (value !== null && typeof value !== "string") return { ok: false, status: 400, message: "Category must be text" };
+  const category = typeof value === "string" ? value.trim().slice(0, 60) || null : null;
+  const { count } = await db.bill.updateMany({ where: { id: billId }, data: { category } });
+  if (count === 0) return { ok: false, status: 404, message: "Bill not found" };
+  await db.activityLog.create({ data: { billId, actor: "user", action: "category_set", detail: { category } } });
+  return { ok: true };
+}

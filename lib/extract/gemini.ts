@@ -4,7 +4,7 @@ import type { VisionProvider } from "./provider";
 import { isTimeout, with429Backoff } from "./backoff";
 
 const DEFAULT_MODEL = "gemini-3.8-flash";
-const DEFAULT_FALLBACK = "gemini-3.5-flash";
+const DEFAULT_FALLBACK = "gemini-3.5-flash,gemini-3.5-flash-lite,gemini-3.7-flash";
 
 /** VISION_MODEL first, then VISION_MODEL_FALLBACK (comma separated), without repeats. */
 export function modelChain(primary?: string, fallback?: string): string[] {
@@ -14,7 +14,7 @@ export function modelChain(primary?: string, fallback?: string): string[] {
 
 /** Overloaded, rate limited or hung: worth trying the next model. */
 function isTransient(err: unknown): boolean {
-  if (APICallError.isInstance(err)) return err.statusCode === 429 || err.statusCode === 503 || err.statusCode === 500;
+  if (APICallError.isInstance(err)) return [429, 500, 503, 404].includes(err.statusCode ?? 0); // 404: the model id was retired
   return isTimeout(err);
 }
 

@@ -1,5 +1,6 @@
 import type { Approval, Decision, RiskLevel } from "@prisma/client";
 import { db } from "@/lib/db";
+import { normalizeVendorName } from "./normalize";
 import { transition } from "./transition";
 
 export interface ApprovalInput {
@@ -79,6 +80,16 @@ export async function recordApproval(billId: string, input: ApprovalInput): Prom
         riskLevel: bill.riskLevel,
       },
     });
+    // Approving a bill from a vendor not on file confirms that vendor (a human action, logged).
+    if (input.decision === "approved" && !bill.vendorId && bill.proposedVendorName && bill.payeeEmail) {
+      const vendor = await tx.vendor.create({
+        data: { name: bill.proposedVendorName, normalizedName: normalizeVendorName(bill.proposedVendorName), paypalEmail: bill.payeeEmail },
+      });
+      await tx.bill.update({ where: { id: billId }, data: { vendorId: vendor.id } });
+      await tx.activityLog.create({
+        data: { billId, actor: "user", action: "vendor_confirmed", detail: { vendorId: vendor.id, name: vendor.name, paypalEmail: vendor.paypalEmail, actorName: approval.actorName } },
+      });
+    }
     const moved = await transition(billId, "needs_review", input.decision, {
       tx,
       actor: "user",
