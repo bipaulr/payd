@@ -57,3 +57,13 @@ One line of reasoning each. Newest at the bottom.
 - **Edits are limited to needs_review and re-run the risk engine; a confirmed vendor's name is not editable here.**
 - **Ran the dev server with `VISION_MODEL=gemini-3.5-flash` in the shell instead of editing .env.** gemini-3.8-flash returned 503 "high demand" and extraction timed out; 3.5-flash worked.
 - **The webhook route is not part of P5; "Refresh from PayPal" settles payouts here.**
+
+## Takeover session, 2026-11-12
+
+- **P2 was only half built (no webhook route, no tests); finished it directly instead of re-running run.sh.** logs/P2.log and P3.log were empty and run.sh trusts the exit code alone.
+- **Webhook logic lives in `lib/bills/webhook.ts`; the route only calls it.** The handler is tested without a running server.
+- **An unverified webhook is stored under a random `unverified:<uuid>` key, not its claimed event id.** Otherwise a forged delivery could occupy a real event id and make the real event look like a replay.
+- **A stored event whose processing failed is processed again on redelivery; the route answers 500 so PayPal retries.** Applying a payout status is idempotent, so reprocessing is safe.
+- **payBill and webhook tests run against the real Postgres with a mocked PayPal (global fetch), and skip when no database is reachable.** The double-pay guarantee is a row lock and unique keys; a mocked database would not prove it.
+- **`VISION_MODEL_FALLBACK` (default `gemini-3.5-flash`) is tried when the main model returns 503 or 429 or times out, and a failed model is skipped for 3 minutes.** `gemini-3.8-flash` returned 503 "high demand" on both days; a demo cannot depend on one free-tier model.
+- **P7 (agent) and P9 (polish) are cut.** Paul's instruction: only if everything else is verified with 3 hours left, which it is not.

@@ -33,7 +33,9 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: VISION_MODEL
-        sync: false
+        value: gemini-3.8-flash
+      - key: VISION_MODEL_FALLBACK
+        value: gemini-3.5-flash
       - key: APP_URL
         sync: false
       - key: AG_GRID_LICENSE_KEY
