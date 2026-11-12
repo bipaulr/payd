@@ -461,6 +461,37 @@ body:has(.dose) {
   font-size: clamp(1.75rem, 3.4vw, 2.75rem);
   color: color-mix(in oklab, var(--t) 55%, var(--dose-band-ink));
 }
+/* Compartments are buttons: pointing at one lifts it and puts its bill on the label. */
+button.dose-tray {
+  cursor: pointer;
+  border: 0;
+  transition: transform var(--dur-short) ease-out;
+}
+button.dose-tray:hover,
+button.dose-tray[aria-pressed="true"] {
+  transform: translateY(-10px);
+}
+button.dose-tray:active {
+  transform: translateY(-4px);
+}
+button.dose-tray:focus-visible,
+button.dose-tag:focus-visible {
+  outline: 2px solid var(--dose-accent-deep);
+  outline-offset: 3px;
+}
+button.dose-tag {
+  cursor: pointer;
+  border: 0;
+  transition: transform var(--dur-micro) ease-out;
+}
+button.dose-tag:hover,
+button.dose-tag[aria-pressed="true"] {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1.5px var(--dose-accent-deep), 0 10px 18px -12px var(--dose-shade);
+}
+button.dose-tag:active {
+  transform: none;
+}
 .dose-tray::after {
   content: "";
   position: absolute;
@@ -565,7 +596,12 @@ body:has(.dose) {
   .dose-light i {
     animation: none;
   }
-  .dose-btn:active {
+  .dose-btn:active,
+  button.dose-tray:hover,
+  button.dose-tray[aria-pressed="true"],
+  button.dose-tray:active,
+  button.dose-tag:hover,
+  button.dose-tag[aria-pressed="true"] {
     transform: none;
   }
 }

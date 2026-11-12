@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HomeOrganiser from "@/components/HomeOrganiser";
 import { DM_Mono, Instrument_Sans, Schibsted_Grotesk } from "next/font/google";
 
 // The homepage is set in Hallmark's "Dose" theme; these faces load for this page only.
@@ -12,26 +13,7 @@ const steps = [
   { n: "3", tint: "dose-t4", title: "Pays after you approve", body: "You approve, PayPal Payouts pays. No approval, no payment. A bill can be paid once, however many times the button is clicked." },
 ];
 
-/** The demo's five bills: three paid, two stopped. One compartment each. */
-const bills = [
-  { initial: "B", vendor: "Brightleaf", paid: true, tint: "dose-t1" },
-  { initial: "H", vendor: "Harborline", paid: true, tint: "dose-t2" },
-  { initial: "G", vendor: "Greenfork", paid: true, tint: "dose-t4" },
-  { initial: "P", vendor: "Pinecrest", paid: false, tint: "dose-t5" },
-  { initial: "A", vendor: "Asha Traders", paid: false, tint: "dose-t7" },
-];
-
 const checks = ["Duplicate", "Payee changed", "Unusual amount", "Math mismatch", "Lookalike vendor", "Pressure language"];
-
-function Tick({ grey = false }: { grey?: boolean }) {
-  return (
-    <span className={`dose-tick ${grey ? "dose-tick--grey" : ""}`} aria-hidden>
-      <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        {grey ? <path d="M3 6h6" /> : <path d="M2.5 6.5l2.5 2.5 4.5-5.5" />}
-      </svg>
-    </span>
-  );
-}
 
 export default function Page() {
   return (
@@ -55,43 +37,7 @@ export default function Page() {
           <p className="dose-muted mt-5 text-sm">No login. Takes under a minute.</p>
         </div>
 
-        <figure className="relative min-w-0 lg:col-span-7">
-          <div className="dose-label relative z-[2] mx-auto w-full max-w-sm p-5 text-sm lg:ml-[18%]">
-            <div className="flex items-baseline justify-between gap-4">
-              <span>Asha Traders</span>
-              <span className="dose-fig">AT-1093</span>
-            </div>
-            <p className="dose-fig mt-3 text-2xl font-medium">$1,887.00</p>
-            <ul className="mt-3 space-y-1">
-              <li>Payee changed</li>
-              <li>Unusual amount</li>
-              <li>Pressure language</li>
-            </ul>
-            <div className="dose-label-stub mt-4 pt-4">
-              <span className="dose-stamp dose-stamp--grey">Stopped, high risk</span>
-            </div>
-          </div>
-
-          <div className="dose-organiser relative z-[1] -mt-6 px-2">
-            {bills.map((b) => (
-              <div key={b.initial} className={`dose-plastic dose-tray ${b.tint}`} aria-hidden>
-                {b.initial}
-              </div>
-            ))}
-          </div>
-
-          <ul className="relative z-[2] mt-12 flex flex-wrap justify-center gap-2">
-            {bills.map((b) => (
-              <li key={b.vendor} className="dose-tag">
-                <Tick grey={!b.paid} />
-                <span>
-                  <span className="font-medium">{b.vendor}</span> {b.paid ? "paid" : "stopped"}
-                </span>
-              </li>
-            ))}
-          </ul>
-          <figcaption className="sr-only">The demo&rsquo;s five bills: three paid through PayPal, two stopped by payD.</figcaption>
-        </figure>
+        <HomeOrganiser />
       </section>
 
       <section className="relative z-[1] space-y-5 pb-16">
