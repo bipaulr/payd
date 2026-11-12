@@ -3,9 +3,11 @@
 The memory for any future session. Do not trust `logs/*.done`; trust this file
 and re-run the checks it names.
 
-Last updated: Thu Nov 12 2026, 16:30 IST. Feature freeze 21:00 IST. Submit by
+Last updated: Thu Nov 12 2026, 17:10 IST. Feature freeze 21:00 IST. Submit by
 23:00 IST. Devpost closes Fri Nov 13 01:30 IST.
 
+**Current state: P0 to P6, P8, P10, P11 are DONE and committed. P7 and P9 are cut.
+The audit table below is the state at 16:10; the progress log is what changed since.**
 ## Audit (16:10 to 16:30 IST)
 
 | Step | Status | Evidence | Missing |
@@ -46,3 +48,54 @@ Other findings:
 - Known: Gemini free tier. `gemini-3.8-flash` 503 all day, `gemini-3.5-flash` quota ran out about 16:40; `gemini-3.5-flash-lite` answers. The demo itself needs no model call. Live uploads depend on quota.
 - Known: `.env` DEMO_VENDOR_EMAIL_1 and _3 look like the same sandbox account. Payouts still succeed.
 - typecheck 0, lint 0, tests 0 (75 pass), `npm run build` 0.
+- 17:05 IST. **P10 DONE, P11 DONE.** README.md and docs/DEVPOST.md written from the code.
+
+## P10 audit report (also in logs/P10-report.md)
+
+Final check: typecheck 0, lint 0, tests 0 (75 pass), production build 0.
+
+| # | Issue found | Severity | Fixed |
+|---|---|---|---|
+| 1 | No `/api/webhooks/paypal` route existed (P2 never finished) | Critical | Yes |
+| 2 | No tests for double pay, missing approval, replayed webhook, bad signature | High | Yes, `tests/paypal/` |
+| 3 | A bill stayed `paying` forever without a webhook or a manual refresh | High | Yes, read routes refresh from PayPal |
+| 4 | `VISION_MODEL` (gemini-3.8-flash) returned 503; uploads timed out | High | Yes, fallback chain and cool-down |
+| 5 | Render build would skip devDependencies (TypeScript, Tailwind) under NODE_ENV=production | High | Yes, `npm ci --include=dev`. Not proven on Render |
+| 6 | A forged webhook stored under its claimed id could block the real event | Medium | Yes, stored under a random key |
+| 7 | Failed extraction could not be retried (same file returns the same bill) | Medium | Yes, "Try reading again" |
+| 8 | A non-bill photo showed as "Low risk" | Medium | Yes, "No total was found" panel, approve disabled |
+| 9 | Confirm dialog did not show the sandbox account actually paid | Medium | Yes |
+| 10 | README was a stub | High | Yes |
+| 11 | Empty Invoices page in the nav (agent milestone was cut) | Low | Yes, removed |
+| 12 | Extraction cache was written but never read on upload | Medium | Yes |
+
+What was tried and held:
+- README followed in a fresh clone with an empty database: install, generate, migrate, typecheck, lint, 75 tests, build, dev server, demo load. All passed.
+- Demo story from a clean reset, locally: 3 paid (batches N92XKER8A6QWJ, ESXXJMQJXCHFL, UAR4VKQ7ZK2H4), duplicate and fake high risk and rejected.
+- Pay twice: 4 parallel approve calls plus pay-low-risk on one bill gave 1 Approval, 1 Payout, 1 PayPal batch; the rest got 409. Retry after paying: 409. Replayed webhook and retry after a PayPal 503: covered by tests.
+- Pay without approval: retry-payment on an unapproved bill 409; payBill with no Approval row refuses (test); high risk without override 400; stale amount 409; approve after reject 409.
+- Uploads: 6 MB file 413, empty file 400, exe renamed .pdf 415, corrupt PDF lands in review with the error and a retry button, non-bill photo lands in review as not payable, two files 400.
+- Broken model: 503, quota and timeout all seen live; bill lands in review with a message. Broken PayPal: bill returns to approved with the error and "Retry payment" (test).
+- Forged webhooks: 400, bill unchanged.
+- Secrets: no value from `.env` appears in any tracked file or in git history; `.env` was never committed.
+- Live endpoints: one host constant, sandbox; a test scans the source for live hosts.
+- Rate limits: sixth demo call in a minute gets 429.
+
+Could not verify:
+- The hosted URL on Render (not deployed yet), including the Render build.
+- A real PayPal webhook delivery and its signature check (needs a public URL and PAYPAL_WEBHOOK_ID). The handler is tested with mocked verification only.
+- The model-written risk summary and pressure-language check live: Gemini quota was exhausted. Their fallbacks were seen live.
+- A real photo of a paper bill (only generated PDFs and a synthetic image were used).
+- Dark theme was checked on the ledger and inbox only.
+
+## Left for Paul
+
+1. Push to GitHub (`git push origin main`).
+2. Render: New > Blueprint from the repo (docs/RENDER.md). Fill the secret env vars. Put the URL in APP_URL.
+3. PayPal dashboard: add webhook APP_URL/api/webhooks/paypal with all Payouts events; put its id in PAYPAL_WEBHOOK_ID on Render; redeploy.
+4. On the hosted site: Demo > Load sample data, pay one bill, check its timeline shows "PayPal webhook received".
+5. Put APP_URL and the video link into README.md and docs/DEVPOST.md (search for APP_URL and VIDEO_URL).
+6. Record the video (outline at the end of docs/DEVPOST.md), upload to YouTube as Public.
+7. Submit on Devpost with the text from docs/DEVPOST.md.
+
+Local fallback if Render is not ready: `npm run build` then `npx next start -p 3100`, open http://localhost:3100. Bills settle by polling.
