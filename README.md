@@ -2,7 +2,7 @@
 
 **An AI finance clerk for small businesses. payD reads any bill, flags fakes and duplicates, and pays through PayPal after a human approves.**
 
-- Hosted demo: `APP_URL` (add the Render URL here once deployed)
+- Hosted demo: https://payd-fa00.onrender.com (free plan, the first load can take up to a minute)
 - Demo video: `VIDEO_URL` (add the YouTube link here)
 - Built for the PayPal AI Hackathon. Sandbox only. No real money moves.
 

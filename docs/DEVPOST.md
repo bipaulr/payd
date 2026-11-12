@@ -2,7 +2,7 @@
 
 **Tagline:** An AI finance clerk that reads any bill, flags fakes and duplicates, and pays through PayPal after a human approves.
 
-Links to fill in: hosted demo `APP_URL`, video `VIDEO_URL`, code https://github.com/bipaulr/payd
+Hosted demo: https://payd-fa00.onrender.com. Video: `VIDEO_URL` (to fill in). Code: https://github.com/bipaulr/payd
 
 ## Inspiration
 
