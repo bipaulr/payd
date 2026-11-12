@@ -14,7 +14,7 @@
    - `AG_GRID_LICENSE_KEY`: optional.
    `DATABASE_URL` is wired from `payd-db` automatically; `PAYPAL_ENV` is `sandbox`.
 4. Deploy. Build runs `npm ci && npx prisma generate && npm run build`,
-   `preDeployCommand` runs `npx prisma migrate deploy`, start runs `npm run start`.
+   and the start command runs `npx prisma migrate deploy && npm run start` (the free plan has no pre-deploy step).
 5. Open `https://<your-service>.onrender.com/api/health`; expect
    `{"status":"ok","database":"healthy"}`.
 6. In the PayPal developer dashboard (sandbox app > Webhooks) add

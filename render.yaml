@@ -4,8 +4,8 @@ services:
     runtime: node
     plan: free
     buildCommand: npm ci --include=dev && npx prisma generate && npm run build
-    preDeployCommand: npx prisma migrate deploy
-    startCommand: npm run start
+    # Migrations run at start: the free plan has no pre-deploy command.
+    startCommand: npx prisma migrate deploy && npm run start
     healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
