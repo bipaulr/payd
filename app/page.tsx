@@ -1,77 +1,169 @@
 import Link from "next/link";
+import { DM_Mono, Instrument_Sans, Schibsted_Grotesk } from "next/font/google";
+
+// The homepage is set in Hallmark's "Dose" theme; these faces load for this page only.
+const schibsted = Schibsted_Grotesk({ subsets: ["latin"], weight: ["700"], variable: "--font-schibsted", display: "swap" });
+const instrument = Instrument_Sans({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-instrument", display: "swap" });
+const dmMono = DM_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-dm-mono", display: "swap" });
 
 const steps = [
-  { n: "1", tint: "tint-pink", title: "Reads any bill", body: "Drop in a PDF or a photo. A vision model pulls out the vendor, amounts, dates, line items and the PayPal email, with a confidence for each field." },
-  { n: "2", tint: "tint-lavender", title: "Flags fakes and duplicates", body: "Six checks run on every bill: duplicate, payee changed, unusual amount, math mismatch, lookalike vendor and pressure language. Each flag names its evidence." },
-  { n: "3", tint: "tint-mint", title: "Pays after you approve", body: "You approve, PayPal Payouts pays. No approval, no payment. A bill can be paid once, however many times the button is clicked." },
+  { n: "1", tint: "dose-t3", title: "Reads any bill", body: "Drop in a PDF or a photo. A vision model pulls out the vendor, amounts, dates, line items and the PayPal email, with a confidence for each field." },
+  { n: "2", tint: "dose-t5", title: "Flags fakes and duplicates", body: "Six checks run on every bill: duplicate, payee changed, unusual amount, math mismatch, lookalike vendor and pressure language. Each flag names its evidence." },
+  { n: "3", tint: "dose-t4", title: "Pays after you approve", body: "You approve, PayPal Payouts pays. No approval, no payment. A bill can be paid once, however many times the button is clicked." },
 ];
 
-/** What payD says about the demo's fake bill. The same three flags the app raises on it. */
-const flags = [
-  { check: "Payee changed", reason: "Past 6 payments to Asha Traders went to accounts@ashatraders.example. This bill asks for asha.traders.pay@mail.example." },
-  { check: "Unusual amount", reason: "This bill is $1,887.00, more than 3x the $510.00 median of Asha Traders's last 6 bills." },
-  { check: "Pressure language", reason: "The payment instructions push for immediate payment and say the payment details changed." },
+/** The demo's five bills: three paid, two stopped. One compartment each. */
+const bills = [
+  { initial: "B", vendor: "Brightleaf", paid: true, tint: "dose-t1" },
+  { initial: "H", vendor: "Harborline", paid: true, tint: "dose-t2" },
+  { initial: "G", vendor: "Greenfork", paid: true, tint: "dose-t4" },
+  { initial: "P", vendor: "Pinecrest", paid: false, tint: "dose-t5" },
+  { initial: "A", vendor: "Asha Traders", paid: false, tint: "dose-t7" },
 ];
+
+const checks = ["Duplicate", "Payee changed", "Unusual amount", "Math mismatch", "Lookalike vendor", "Pressure language"];
+
+function Tick({ grey = false }: { grey?: boolean }) {
+  return (
+    <span className={`dose-tick ${grey ? "dose-tick--grey" : ""}`} aria-hidden>
+      <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {grey ? <path d="M3 6h6" /> : <path d="M2.5 6.5l2.5 2.5 4.5-5.5" />}
+      </svg>
+    </span>
+  );
+}
 
 export default function Page() {
   return (
-    <div>
-      <section className="grid items-center gap-10 py-6 lg:grid-cols-12 lg:py-10">
+    <div className={`dose ${schibsted.variable} ${instrument.variable} ${dmMono.variable}`}>
+      <div className="dose-light" aria-hidden>
+        <i /><i /><i /><i />
+      </div>
+
+      <section className="relative z-[1] grid items-center gap-12 pt-6 pb-16 lg:grid-cols-12 lg:pt-12">
         <div className="lg:col-span-5">
-          <h1 className="display max-w-[12ch] text-6xl lg:text-7xl">Bills in. Fakes out.</h1>
-          <p className="mt-6 max-w-[34ch] text-lg leading-8 text-muted">Reads any bill, flags fakes, and pays through PayPal once you approve.</p>
+          <h1 className="max-w-[11ch] text-6xl lg:text-7xl">Bills in. Fakes out.</h1>
+          <p className="dose-muted mt-6 max-w-[32ch] text-xl leading-8">Reads any bill, flags fakes, and pays through PayPal once you approve.</p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link href="/demo" className="btn btn-primary btn-lg">
+            <Link href="/demo" className="dose-btn dose-btn--primary">
               Try the demo
             </Link>
-            <Link href="/inbox" className="btn btn-lg">
+            <Link href="/inbox" className="dose-btn">
               Upload your own bill
             </Link>
           </div>
-          <p className="mt-4 text-sm text-muted">No login. Takes under a minute.</p>
+          <p className="dose-muted mt-5 text-sm">No login. Takes under a minute.</p>
         </div>
 
-        <figure className="min-w-0 lg:col-span-7">
-          <div className="rounded-(--radius) border-2 border-high bg-high-soft p-6">
-            <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <p className="text-lg font-semibold text-high">High risk. Do not pay until you have checked this.</p>
-              <p className="money text-lg font-semibold">$1,887.00</p>
+        <figure className="relative min-w-0 lg:col-span-7">
+          <div className="dose-label relative z-[2] mx-auto w-full max-w-sm p-5 text-sm lg:ml-[18%]">
+            <div className="flex items-baseline justify-between gap-4">
+              <span>Asha Traders</span>
+              <span className="dose-fig">AT-1093</span>
             </div>
-            <dl className="rows mt-4">
-              {flags.map((f) => (
-                <div key={f.check} className="grid gap-1 py-3 sm:grid-cols-[11rem_minmax(0,1fr)] sm:gap-4">
-                  <dt className="font-semibold">{f.check}</dt>
-                  <dd className="text-sm leading-6">{f.reason}</dd>
-                </div>
-              ))}
-            </dl>
+            <p className="dose-fig mt-3 text-2xl font-medium">$1,887.00</p>
+            <ul className="mt-3 space-y-1">
+              <li>Payee changed</li>
+              <li>Unusual amount</li>
+              <li>Pressure language</li>
+            </ul>
+            <div className="dose-label-stub mt-4 pt-4">
+              <span className="dose-stamp dose-stamp--grey">Stopped, high risk</span>
+            </div>
           </div>
-          <figcaption className="mt-3 text-sm text-muted">What payD shows on the fake Asha Traders bill in the demo.</figcaption>
+
+          <div className="dose-organiser relative z-[1] -mt-6 px-2">
+            {bills.map((b) => (
+              <div key={b.initial} className={`dose-plastic dose-tray ${b.tint}`} aria-hidden>
+                {b.initial}
+              </div>
+            ))}
+          </div>
+
+          <ul className="relative z-[2] mt-12 flex flex-wrap justify-center gap-2">
+            {bills.map((b) => (
+              <li key={b.vendor} className="dose-tag">
+                <Tick grey={!b.paid} />
+                <span>
+                  <span className="font-medium">{b.vendor}</span> {b.paid ? "paid" : "stopped"}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <figcaption className="sr-only">The demo&rsquo;s five bills: three paid through PayPal, two stopped by payD.</figcaption>
         </figure>
       </section>
 
-      <section className="border-t border-line py-12">
-        <ol className="grid gap-10 md:grid-cols-3">
-          {steps.map((s) => (
-            <li key={s.n}>
-              <span className={`money flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold ${s.tint}`}>{s.n}</span>
-              <h2 className="display mt-4 text-2xl">{s.title}</h2>
-              <p className="mt-3 max-w-[40ch] leading-7 text-muted">{s.body}</p>
-            </li>
-          ))}
-        </ol>
+      <section className="relative z-[1] space-y-5 pb-16">
+        {steps.map((s) => (
+          <div key={s.n} className={`dose-plastic ${s.tint} grid items-center gap-8 p-8 lg:grid-cols-12 lg:p-12`}>
+            <div className="lg:col-span-6">
+              <p className="dose-num" aria-hidden>
+                {s.n}
+              </p>
+              <h2 className="mt-3 text-3xl lg:text-4xl">{s.title}</h2>
+              <p className="mt-4 max-w-[44ch] text-lg leading-8">{s.body}</p>
+            </div>
+
+            <div className="min-w-0 lg:col-span-6">
+              {s.n === "1" && (
+                <div className="dose-label mx-auto max-w-sm p-5 text-sm">
+                  <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-5 gap-y-2">
+                    <dt className="dose-muted">Vendor</dt>
+                    <dd>Brightleaf Office Supply</dd>
+                    <dt className="dose-muted">Invoice</dt>
+                    <dd className="dose-fig">BL-20417</dd>
+                    <dt className="dose-muted">Due</dt>
+                    <dd className="dose-fig">2026-12-06</dd>
+                    <dt className="dose-muted">Total</dt>
+                    <dd className="dose-fig">$202.96</dd>
+                    <dt className="dose-muted">PayPal</dt>
+                    <dd className="break-all">billing@brightleaf-supply.example</dd>
+                  </dl>
+                  <div className="dose-label-stub mt-4 pt-4">
+                    <span className="dose-stamp">Read from the PDF</span>
+                  </div>
+                </div>
+              )}
+              {s.n === "2" && (
+                <ul className="flex flex-wrap gap-2.5">
+                  {checks.map((c) => (
+                    <li key={c} className="dose-key">
+                      {c}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {s.n === "3" && (
+                <div className="dose-label mx-auto max-w-sm p-5 text-sm">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <span>Harborline IT Services</span>
+                    <span className="dose-fig">$1,580.47</span>
+                  </div>
+                  <ol className="mt-3 space-y-1">
+                    <li>Approved by you</li>
+                    <li>Sent with PayPal Payouts</li>
+                    <li>Paid once</li>
+                  </ol>
+                  <div className="dose-label-stub mt-4 pt-4">
+                    <span className="dose-stamp">Paid, sandbox</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
       </section>
 
-      <section className="border-t border-line py-12">
-        <div className="grid gap-6 lg:grid-cols-12">
-          <h2 className="display text-3xl lg:col-span-4">What the demo shows</h2>
-          <div className="lg:col-span-8">
-            <p className="max-w-[65ch] text-lg leading-8">
-              Five new bills arrive for a jewelry studio with five regular vendors. Three are fine and get paid through the PayPal sandbox. One is a
-              second copy of a bill that was already paid. One uses a known vendor&rsquo;s name with a new PayPal email, four times the usual amount
-              and an urgent note. payD stops those two and says why.
-            </p>
-          </div>
+      <section className="dose-band-ink relative z-[1] mb-6 grid gap-8 p-8 lg:grid-cols-12 lg:p-14">
+        <h2 className="text-4xl lg:col-span-5 lg:text-5xl">What the demo shows</h2>
+        <div className="lg:col-span-7">
+          <p className="max-w-[60ch] text-lg leading-8">
+            Five new bills arrive for a jewelry studio with five regular vendors. Three are fine and get paid through the PayPal sandbox. One is a
+            second copy of a bill that was already paid. One uses a known vendor&rsquo;s name with a new PayPal email, four times the usual amount and
+            an urgent note.
+          </p>
+          <p className="dose-mint mt-4 text-lg font-medium">payD stops those two and says why.</p>
         </div>
       </section>
     </div>

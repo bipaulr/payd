@@ -1,4 +1,4 @@
-/* Hallmark · v2.0.0 · redesign: full · genre: modern-minimal · theme: brand (the owner's soft pastel palette) · posture: restrained · shape: app screen · hero: Stage (/) · nav: one bar, a wordmark and three links · footer: one line · signature: the risk panel that catches the fake bill · built: the project */
+/* Hallmark · v2.0.0 · redesign: full · genre: modern-minimal · theme: brand (the owner's soft pastel palette), Dose on / (by request) · dose: white · posture: restrained · shape: app screen · hero: Stage (/) · nav: one bar, a wordmark and three links · footer: one line · signature: the risk panel that catches the fake bill · built: the project */
 /* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V3 · weakest: V, five screens share one system on purpose; the landing leads with the real risk panel instead of three feature cards */
 /* Hallmark · dropped "AI finance clerk for small businesses" · 54 names the eyebrow; the sentence under the head says it */
 /* Hallmark · reworded "Bills in. Fakes out. Paid with PayPal when you say so." to "Bills in. Fakes out." · 38iii names the accented words and the hero takes seven words */
@@ -273,6 +273,299 @@ h3 {
     scroll-behavior: auto !important;
   }
   .btn:active {
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------------------------------
+ * Homepage only: Hallmark theme "Dose" (by request). Warm paper with a fibre grain, window
+ * light, tinted translucent plastic, one green for every signal. Tokens first, then the parts.
+ * ---------------------------------------------------------------------------------------- */
+:root {
+  --dose-paper: oklch(97.6% 0.011 88);
+  --dose-ink: oklch(21% 0.025 170);
+  --dose-muted: oklch(46% 0.024 165);
+  --dose-rule: oklch(86.5% 0.022 140);
+  --dose-accent: oklch(50% 0.13 160);
+  --dose-accent-deep: oklch(42% 0.11 162);
+  --dose-accent-soft: oklch(88% 0.08 160);
+  --dose-accent-ink: oklch(99% 0.006 160);
+  --dose-grey: oklch(52% 0.012 170);
+  --dose-grey-soft: oklch(90% 0.008 170);
+  --dose-p1: oklch(85% 0.052 22);
+  --dose-p2: oklch(87.5% 0.058 64);
+  --dose-p3: oklch(91.5% 0.064 98);
+  --dose-p4: oklch(86.5% 0.075 160);
+  --dose-p5: oklch(87% 0.048 210);
+  --dose-p6: oklch(84% 0.045 270);
+  --dose-p7: oklch(84% 0.048 322);
+  --dose-light: oklch(99.4% 0.016 84);
+  --dose-glint: oklch(100% 0 0);
+  --dose-label: oklch(99.2% 0.006 90);
+  --dose-label-ink: oklch(21% 0.025 170);
+  --dose-label-muted: oklch(46% 0.024 165);
+  --dose-band-ink: oklch(21% 0.025 170);
+  --dose-band-paper: oklch(97.6% 0.011 88);
+  --dose-plastic-alpha: 62%;
+  --dose-shade: oklch(36% 0.06 165 / 0.32);
+  --dose-shade-soft: oklch(30% 0.03 165 / 0.12);
+  --dose-grain: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22220%22 height=%22220%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22 stitchTiles=%22stitch%22/%3E%3CfeColorMatrix values=%220 0 0 0 0.35 0 0 0 0 0.38 0 0 0 0 0.33 0 0 0 0.07 0%22/%3E%3C/filter%3E%3Crect width=%22220%22 height=%22220%22 filter=%22url(%23n)%22/%3E%3C/svg%3E");
+  --dose-face-display: var(--font-schibsted), ui-sans-serif, sans-serif;
+  --dose-face-body: var(--font-instrument), ui-sans-serif, sans-serif;
+  --dose-face-mono: var(--font-dm-mono), ui-monospace, monospace;
+}
+
+/* Dose "night" ground when the visitor prefers dark. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dose-paper: oklch(15% 0.01 170);
+    --dose-ink: oklch(96% 0.01 160);
+    --dose-muted: oklch(76% 0.018 165);
+    --dose-rule: oklch(34% 0.016 160);
+    --dose-accent: oklch(62% 0.14 160);
+    --dose-accent-deep: oklch(52% 0.13 162);
+    --dose-accent-ink: oklch(14% 0.02 165);
+    --dose-light: oklch(60% 0.03 120 / 0.22);
+    --dose-glint: oklch(100% 0 0 / 0.3);
+    --dose-band-ink: oklch(24% 0.022 165);
+    --dose-band-paper: oklch(96% 0.01 160);
+    --dose-plastic-alpha: 40%;
+    --dose-shade: oklch(5% 0.02 165 / 0.6);
+    --dose-shade-soft: oklch(5% 0.01 165 / 0.5);
+  }
+}
+
+/* The homepage sets the page ground; the bar and the footer keep the app's surfaces. */
+:root:has(.dose) {
+  --bg: var(--dose-paper);
+}
+body:has(.dose) {
+  background-image: var(--dose-grain);
+}
+
+.dose {
+  position: relative;
+  color: var(--dose-ink);
+  font-family: var(--dose-face-body);
+}
+.dose h1,
+.dose h2,
+.dose h3 {
+  font-family: var(--dose-face-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+}
+.dose-muted {
+  color: var(--dose-muted);
+}
+
+/* Window light: blurred panes falling across the paper, drifting slowly. */
+.dose-light {
+  position: absolute;
+  inset: -2rem 0 auto 0;
+  height: 34rem;
+  overflow: clip;
+  pointer-events: none;
+  z-index: 0;
+}
+.dose-light i {
+  position: absolute;
+  top: -20%;
+  width: 11rem;
+  height: 140%;
+  background: var(--dose-light);
+  filter: blur(26px);
+  opacity: 0.8;
+  transform: skewX(-24deg) translateX(0);
+  animation: dose-drift 90s ease-in-out infinite alternate;
+}
+.dose-light i:nth-child(1) { left: 12%; }
+.dose-light i:nth-child(2) { left: 30%; width: 7rem; }
+.dose-light i:nth-child(3) { left: 46%; }
+.dose-light i:nth-child(4) { left: 64%; width: 8rem; }
+@keyframes dose-drift {
+  to { transform: skewX(-24deg) translateX(5rem); }
+}
+
+/* Moulded controls: 52px, a rim below, sinking on press. */
+.dose-btn {
+  position: relative;
+  display: inline-flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.5rem;
+  border-radius: 10px;
+  background: var(--dose-label);
+  color: var(--dose-label-ink);
+  font-family: var(--dose-face-body);
+  font-weight: 500;
+  box-shadow: inset 0 1px 0 var(--dose-glint), 0 0 0 1px var(--dose-rule), 0 3px 0 var(--dose-rule);
+  transition: transform var(--dur-micro) ease-out, box-shadow var(--dur-micro) ease-out;
+}
+.dose-btn:hover {
+  box-shadow: inset 0 1px 0 var(--dose-glint), 0 0 0 1px var(--dose-grey), 0 3px 0 var(--dose-grey);
+}
+.dose-btn:active {
+  transform: translateY(3px);
+  box-shadow: inset 0 1px 0 var(--dose-glint), 0 0 0 1px var(--dose-rule), 0 0 0 var(--dose-rule);
+}
+.dose-btn:focus-visible {
+  outline: 2px solid var(--dose-accent-deep);
+  outline-offset: 3px;
+}
+.dose-btn--primary {
+  background: var(--dose-accent);
+  color: var(--dose-accent-ink);
+  box-shadow: inset 0 1px 0 var(--dose-glint), 0 0 0 1px var(--dose-accent-deep), 0 3px 0 var(--dose-accent-deep);
+}
+.dose-btn--primary:hover {
+  background: var(--dose-accent-deep);
+  box-shadow: inset 0 1px 0 var(--dose-glint), 0 0 0 1px var(--dose-accent-deep), 0 3px 0 var(--dose-accent-deep);
+}
+.dose-btn--primary:active {
+  box-shadow: 0 0 0 1px var(--dose-accent-deep), 0 0 0 var(--dose-accent-deep);
+}
+
+/* Plastic: a pale tint you can see the paper through, a glint on top, a shade at the foot. */
+.dose-plastic {
+  --t: var(--dose-p4);
+  position: relative;
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--t) var(--dose-plastic-alpha), transparent);
+  box-shadow: inset 0 1.5px 0 var(--dose-glint), inset 0 -24px 36px -28px color-mix(in oklab, var(--t) 45%, var(--dose-band-ink));
+}
+.dose-t1 { --t: var(--dose-p1); }
+.dose-t2 { --t: var(--dose-p2); }
+.dose-t3 { --t: var(--dose-p3); }
+.dose-t4 { --t: var(--dose-p4); }
+.dose-t5 { --t: var(--dose-p5); }
+.dose-t6 { --t: var(--dose-p6); }
+.dose-t7 { --t: var(--dose-p7); }
+
+/* The organiser: one compartment per demo bill, turned three-quarter on the paper. */
+.dose-organiser {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+  transform: perspective(1100px) rotateX(24deg) rotateZ(-7deg);
+  transform-origin: 50% 60%;
+}
+.dose-tray {
+  aspect-ratio: 1 / 1.05;
+  display: grid;
+  place-items: center;
+  font-family: var(--dose-face-display);
+  font-weight: 700;
+  font-size: clamp(1.75rem, 3.4vw, 2.75rem);
+  color: color-mix(in oklab, var(--t) 55%, var(--dose-band-ink));
+}
+.dose-tray::after {
+  content: "";
+  position: absolute;
+  inset: auto 8% -38% 8%;
+  height: 46%;
+  border-radius: 14px;
+  background: var(--t);
+  filter: blur(18px);
+  opacity: 0.55;
+  z-index: -1;
+}
+
+/* A label is paper on plastic: mono throughout, a stub on a dashed rule, a stamp. */
+.dose-label {
+  background: var(--dose-label);
+  color: var(--dose-label-ink);
+  border-radius: 10px;
+  box-shadow: 0 1px 1px var(--dose-shade-soft), 8px 18px 28px -14px var(--dose-shade);
+}
+/* Mono is for figures only: an amount, a date, an invoice number. */
+.dose-fig {
+  font-family: var(--dose-face-mono);
+  font-variant-numeric: tabular-nums;
+}
+.dose-label .dose-muted {
+  color: var(--dose-label-muted);
+}
+.dose-label-stub {
+  border-top: 1px dashed var(--dose-rule);
+}
+.dose-stamp {
+  display: inline-block;
+  padding: 0.35rem 0.7rem;
+  border: 2px solid currentColor;
+  outline: 1px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 6px;
+  transform: rotate(-2deg);
+  font-weight: 500;
+  color: var(--dose-accent-deep);
+}
+.dose-stamp--grey {
+  color: var(--dose-grey);
+}
+
+.dose-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
+  background: var(--dose-label);
+  color: var(--dose-label-ink);
+  box-shadow: 0 1px 2px var(--dose-shade-soft), 0 10px 18px -12px var(--dose-shade);
+  font-size: 0.875rem;
+}
+.dose-tick {
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--dose-accent-soft);
+  color: var(--dose-label-ink);
+}
+.dose-tick--grey {
+  background: var(--dose-grey-soft);
+  color: var(--dose-label-ink);
+}
+
+/* Plastic keys for the six checks. */
+.dose-key {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  padding: 0 1rem;
+  border-radius: 10px;
+  background: var(--dose-label);
+  color: var(--dose-label-ink);
+  box-shadow: inset 0 1px 0 var(--dose-glint), 0 0 0 1px var(--dose-shade-soft), 0 2px 0 var(--dose-shade-soft);
+  font-weight: 500;
+}
+
+.dose-band-ink {
+  border-radius: 14px;
+  background: var(--dose-band-ink);
+  color: var(--dose-band-paper);
+}
+.dose-band-ink .dose-mint {
+  color: var(--dose-accent-soft);
+}
+.dose-num {
+  font-family: var(--dose-face-display);
+  font-weight: 700;
+  font-size: clamp(3.5rem, 7vw, 5.25rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in oklab, var(--t) 50%, var(--dose-band-ink));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dose-light i {
+    animation: none;
+  }
+  .dose-btn:active {
     transform: none;
   }
 }

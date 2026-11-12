@@ -86,3 +86,4 @@ One line of reasoning each. Newest at the bottom.
 - **Bricolage Grotesque for heads, Figtree for body, loaded with next/font.** Self-hosted at build time, so no runtime font request.
 - **Landing hero reworded to "Bills in. Fakes out." with a 12-word line, and the eyebrow removed.** Hallmark's hero budget; the hero now shows the real risk panel for the demo's fake bill.
 - **Lists are flat rows with rules, not striped cards; labels are sentence case; the AG Grid theme reads the app's CSS tokens.** One system across screens, and dark mode follows without JavaScript.
+- **The homepage uses Hallmark's "Dose" theme (Paul's request, Nov 12); the app screens keep the pastel system.** Dose tokens are prefixed `--dose-` and its faces load in `app/page.tsx` only, so nothing leaks into the inbox, bill or ledger. The hero shows the demo's five bills as an organiser: three paid, two stopped (grey, as the theme forbids red).
