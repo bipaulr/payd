@@ -213,7 +213,10 @@ export default function LedgerGrid() {
       count++;
       sum += n.data.totalCents ?? 0;
     });
-    setTotals([{ id: "__total", vendor: `${count} ${count === 1 ? "bill" : "bills"} shown`, invoiceNumber: null, issueDate: null, dueDate: null, totalCents: sum, status: "", riskLevel: null, paidAt: null, batchId: null, category: null, isTotal: true }]);
+    const label = `${count} ${count === 1 ? "bill" : "bills"} shown`;
+    // Keep the same array when nothing changed. A new array re-renders the grid, which fires
+    // onModelUpdated again; that loop never settles and blocks navigation away from the page.
+    setTotals((prev) => prev[0] && prev[0].vendor === label && prev[0].totalCents === sum ? prev : [{ id: "__total", vendor: label, invoiceNumber: null, issueDate: null, dueDate: null, totalCents: sum, status: "", riskLevel: null, paidAt: null, batchId: null, category: null, isTotal: true }]);
   }, []);
 
   const choose = (v: View) => {
